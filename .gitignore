@@ -1,0 +1,9 @@
+.tox
+
+__pycache__
+.cache
+.pytest_cache
+.mypy_cache
+
+.coverage
+test-reports
