@@ -7,3 +7,8 @@ class Todo:
         text: str,
     ) -> None:
         ...
+
+    def ping(
+        self,
+    ) -> str:
+        ...

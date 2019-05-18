@@ -1,16 +1,15 @@
-{% for module_name in modules -%}
-from . import {{ module_name }}
+{% for import in imports -%}
+from . import {{ import }}
 {%- endfor %}
 
 
 class {{ service.name }}:
-    {%- for method in service.methods %}
+{%- for method in service.methods %}
     def {{ method.name }}(
         self,
-        {% for arg in method.args -%}
-            {{ arg.name }}: {{ arg.type }},
-        {%- endfor %}
+{%- for arg in method.args %}
+        {{ arg.name }}: {{ arg.type }},
+{%- endfor %}
     ) -> {{ method.return_type }}:
         ...
-    {%- endfor %}
-
+{% endfor %}
