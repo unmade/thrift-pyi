@@ -1,12 +1,16 @@
-from . import shared
+{% for module_name in modules -%}
+from . import {{ module_name }}
+{%- endfor %}
 
 
-class Todo:
-
-    def create(
+class {{ service.name }}:
+    {%- for method in service.methods %}
+    def {{ method.name }}(
         self,
-        text: str,
-
-    ):
+        {% for arg in method.args -%}
+            {{ arg.name }}: {{ arg.type }},
+        {%- endfor %}
+    ) -> {{ method.return_type }}:
         ...
+    {%- endfor %}
 
