@@ -1,0 +1,2 @@
+def thriftpyi():
+    pass
