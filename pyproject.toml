@@ -14,6 +14,7 @@ thriftpyi = "thriftpyi.cli:main"
 [tool.poetry.dependencies]
 python = "^3.7"
 click = "^7.0"
+jinja2 = "^2.10"
 
 [tool.poetry.dev-dependencies]
 
