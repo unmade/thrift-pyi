@@ -1,2 +1,6 @@
+from thriftpyi import files, renderers
+
+
 def thriftpyi():
-    pass
+    result = renderers.render()
+    files.save(result, to="tests/stubs/actual/todo.pyi")

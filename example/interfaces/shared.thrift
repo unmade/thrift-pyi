@@ -1,0 +1,3 @@
+service Service {
+    string ping();
+}

@@ -32,7 +32,6 @@ repos:
     rev: v2.1.0
     hooks:
     -   id: trailing-whitespace
-    -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: debug-statements
     -   id: flake8
