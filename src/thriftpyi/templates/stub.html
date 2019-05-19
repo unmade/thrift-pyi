@@ -1,25 +1,35 @@
+from enum import IntEnum
 from typing import *
 
-{% for import in imports -%}
+
+{% for import in imports %}
 from . import {{ import }}
-{%- endfor %}
+{% endfor %}
 
 
-{%- for error in errors %}
+{% for error in errors %}
 class {{ error.name }}(Exception):
 {%- for field in error.fields %}
     {{ field.name }}: {{ field.type }}
 {%- endfor %}
+{% endfor %}
+
+
+{% for enum in enums %}
+class {{ enum.name }}(IntEnum):
+{%- for field  in enum.fields %}
+    {{ field.name }} = {{ field.value }}
 {%- endfor %}
+{% endfor %}
 
 
 class {{ service.name }}:
-{%- for method in service.methods %}
+{% for method in service.methods %}
     def {{ method.name }}(
         self,
-{%- for arg in method.args %}
+{% for arg in method.args %}
         {{ arg.name }}: {{ arg.type }},
-{%- endfor %}
+{% endfor %}
     ) -> {{ method.return_type }}:
         ...
 {% endfor %}

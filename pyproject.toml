@@ -8,6 +8,11 @@ packages = [
     { include = "thriftpyi", from = "src" },
 ]
 
+[tool.isort]
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
+
 [tool.poetry.scripts]
 thriftpyi = "thriftpyi.cli:main"
 
@@ -15,6 +20,7 @@ thriftpyi = "thriftpyi.cli:main"
 python = "^3.7"
 click = "^7.0"
 jinja2 = "^2.10"
+black = "=19.3b0"
 
 [tool.poetry.dev-dependencies]
 

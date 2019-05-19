@@ -34,7 +34,20 @@ class Error:
 
 
 @dataclass
+class EnumField:
+    name: str
+    value: int
+
+
+@dataclass
+class Enumeration:
+    name: str
+    fields: List[EnumField]
+
+
+@dataclass
 class Content:
     imports: List[str]
+    enums: List[Enumeration]
     errors: List[Error]
     service: Service

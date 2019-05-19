@@ -2,7 +2,16 @@ from types import ModuleType
 from typing import List
 
 import thriftpy2 as thriftpy
-from thriftpyi.entities import Arg, Content, Error, Field, Method, Service
+from thriftpyi.entities import (
+    Arg,
+    Content,
+    Enumeration,
+    EnumField,
+    Error,
+    Field,
+    Method,
+    Service,
+)
 from thriftpyi.proxies import InterfaceProxy, ServiceProxy
 
 
@@ -11,6 +20,7 @@ def parse(interface: str) -> Content:
     return Content(
         imports=parse_imports(module),
         errors=parse_errors(module),
+        enums=parse_enums(module),
         service=parse_service(module.get_service()),
     )
 
@@ -33,6 +43,19 @@ def parse_errors(module: InterfaceProxy) -> List[Error]:
             ],
         )
         for error in module.get_errors()
+    ]
+
+
+def parse_enums(module: InterfaceProxy) -> List[Enumeration]:
+    return [
+        Enumeration(
+            name=enum.name,
+            fields=[
+                EnumField(name=field.name, value=field.value)
+                for field in enum.get_fields()
+            ],
+        )
+        for enum in module.get_enums()
     ]
 
 

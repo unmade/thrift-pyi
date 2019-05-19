@@ -31,6 +31,13 @@ class InterfaceProxy:
             if isinstance(member, TPayloadMeta) and hasattr(member, "args")
         ]
 
+    def get_enums(self) -> List["EnumProxy"]:
+        return [
+            EnumProxy(member)
+            for name, member in self.module.__dict__.items()
+            if hasattr(member, "_NAMES_TO_VALUES")
+        ]
+
 
 class ExceptionProxy:
     def __init__(self, texc: TPayloadMeta):
@@ -41,6 +48,22 @@ class ExceptionProxy:
         return [
             FieldProxy(thrift_spec) for thrift_spec in self._texc.thrift_spec.values()
         ]
+
+
+class EnumFieldProxy:
+    def __init__(self, name, value):
+        self.name = name
+        self.value = value
+
+
+class EnumProxy:
+    def __init__(self, tenum: TPayloadMeta):
+        self._tenum = tenum
+        self.name = tenum.__name__
+
+    def get_fields(self) -> List["EnumFieldProxy"]:
+        fields = self._tenum._NAMES_TO_VALUES  # pylint: disable=protected-access
+        return [EnumFieldProxy(name, value) for name, value in fields.items()]
 
 
 class ServiceProxy:
