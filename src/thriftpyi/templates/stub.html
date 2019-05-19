@@ -1,5 +1,15 @@
+from typing import *
+
 {% for import in imports -%}
 from . import {{ import }}
+{%- endfor %}
+
+
+{%- for error in errors %}
+class {{ error.name }}(Exception):
+{%- for field in error.fields %}
+    {{ field.name }}: {{ field.type }}
+{%- endfor %}
 {%- endfor %}
 
 

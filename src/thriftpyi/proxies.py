@@ -1,7 +1,7 @@
 from types import ModuleType
 from typing import Dict, List
 
-from thriftpy2.thrift import TType
+from thriftpy2.thrift import TPayloadMeta, TType
 
 
 class InterfaceProxy:
@@ -23,6 +23,24 @@ class InterfaceProxy:
             for name, item in self.module.__dict__.items()
             if isinstance(item, ModuleType)
         }
+
+    def get_errors(self) -> List["ExceptionProxy"]:
+        return [
+            ExceptionProxy(member)
+            for name, member in self.module.__dict__.items()
+            if isinstance(member, TPayloadMeta) and hasattr(member, "args")
+        ]
+
+
+class ExceptionProxy:
+    def __init__(self, texc: TPayloadMeta):
+        self._texc = texc
+        self.name = texc.__name__
+
+    def get_fields(self) -> List["FieldProxy"]:
+        return [
+            FieldProxy(thrift_spec) for thrift_spec in self._texc.thrift_spec.values()
+        ]
 
 
 class ServiceProxy:
@@ -49,11 +67,11 @@ class ServiceProxy:
 
 class VarProxy:
     def __init__(self, thrift_spec: tuple):
-        ttype, name, *meta, is_required = thrift_spec
+        ttype, name, *meta, _ = thrift_spec
         self._ttype = ttype
         self.name = name
         self._meta = meta
-        self._is_required = is_required
+        self._is_required = True
 
     def reveal_type(self) -> str:
         type_map = {
@@ -69,4 +87,13 @@ class VarProxy:
             TType.SET: "set",
             TType.LIST: "list",
         }
-        return type_map.get(self._ttype, "Any")
+        pytype = type_map.get(self._ttype, "Any")
+        if not self._is_required:
+            pytype = f"Optional[{pytype}]"
+        return pytype
+
+
+class FieldProxy(VarProxy):
+    def __init__(self, thrift_spec: tuple):
+        super().__init__(thrift_spec)
+        self._is_required = thrift_spec[-1]

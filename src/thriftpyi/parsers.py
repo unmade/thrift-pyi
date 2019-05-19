@@ -2,14 +2,16 @@ from types import ModuleType
 from typing import List
 
 import thriftpy2 as thriftpy
-from thriftpyi.entities import Arg, Content, Method, Service
+from thriftpyi.entities import Arg, Content, Error, Field, Method, Service
 from thriftpyi.proxies import InterfaceProxy, ServiceProxy
 
 
 def parse(interface: str) -> Content:
     module = InterfaceProxy(thriftpy.load(interface))
     return Content(
-        imports=parse_imports(module), service=parse_service(module.get_service())
+        imports=parse_imports(module),
+        errors=parse_errors(module),
+        service=parse_service(module.get_service()),
     )
 
 
@@ -18,6 +20,19 @@ def parse_imports(module: InterfaceProxy) -> List[str]:
         name
         for name, item in module.get_imports().items()
         if isinstance(item, ModuleType)
+    ]
+
+
+def parse_errors(module: InterfaceProxy) -> List[Error]:
+    return [
+        Error(
+            name=error.name,
+            fields=[
+                Field(name=field.name, type=field.reveal_type())
+                for field in error.get_fields()
+            ],
+        )
+        for error in module.get_errors()
     ]
 
 

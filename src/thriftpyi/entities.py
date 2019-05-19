@@ -22,6 +22,19 @@ class Service:
 
 
 @dataclass
+class Field:
+    name: str
+    type: str
+
+
+@dataclass
+class Error:
+    name: str
+    fields: List[Field]
+
+
+@dataclass
 class Content:
     imports: List[str]
+    errors: List[Error]
     service: Service
