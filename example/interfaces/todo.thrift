@@ -10,6 +10,12 @@ enum TodoType {
 }
 
 
+struct TodoItem {
+    1: required string text
+    2: required TodoType type
+}
+
+
 service Todo extends shared.Service {
     void create(
         1: string text,

@@ -11,6 +11,7 @@ from thriftpyi.entities import (
     Field,
     Method,
     Service,
+    Struct,
 )
 from thriftpyi.proxies import InterfaceProxy, ServiceProxy
 
@@ -21,6 +22,7 @@ def parse(interface: str) -> Content:
         imports=parse_imports(module),
         errors=parse_errors(module),
         enums=parse_enums(module),
+        structs=parse_structs(module),
         service=parse_service(module.get_service()),
     )
 
@@ -56,6 +58,19 @@ def parse_enums(module: InterfaceProxy) -> List[Enumeration]:
             ],
         )
         for enum in module.get_enums()
+    ]
+
+
+def parse_structs(module: InterfaceProxy) -> List[Struct]:
+    return [
+        Struct(
+            name=struct.name,
+            fields=[
+                Field(name=field.name, type=field.reveal_type())
+                for field in struct.get_fields()
+            ],
+        )
+        for struct in module.get_structs()
     ]
 
 

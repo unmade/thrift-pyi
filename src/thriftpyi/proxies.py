@@ -38,6 +38,24 @@ class InterfaceProxy:
             if hasattr(member, "_NAMES_TO_VALUES")
         ]
 
+    def get_structs(self) -> List["StructProxy"]:
+        return [
+            StructProxy(member)
+            for name, member in self.module.__dict__.items()
+            if isinstance(member, TPayloadMeta) and not hasattr(member, "args")
+        ]
+
+
+class StructProxy:
+    def __init__(self, tstruct: TPayloadMeta):
+        self._tstruct = tstruct
+        self.name = tstruct.__name__
+
+    def get_fields(self) -> List["VarProxy"]:
+        return [
+            VarProxy(thrift_spec) for thrift_spec in self._tstruct.thrift_spec.values()
+        ]
+
 
 class ExceptionProxy:
     def __init__(self, texc: TPayloadMeta):

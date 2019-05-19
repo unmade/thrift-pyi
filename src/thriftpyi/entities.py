@@ -46,8 +46,15 @@ class Enumeration:
 
 
 @dataclass
+class Struct:
+    name: str
+    fields: List[Field]
+
+
+@dataclass
 class Content:
     imports: List[str]
-    enums: List[Enumeration]
     errors: List[Error]
+    enums: List[Enumeration]
+    structs: List[Struct]
     service: Service
