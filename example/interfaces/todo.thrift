@@ -40,4 +40,8 @@ service Todo extends shared.Service {
     map<i32, i64> stats(
 
     )
+
+    set<i16> types(
+
+    )
 }

@@ -199,5 +199,8 @@ def _get_map(meta) -> str:
 
 
 def _get_set(meta) -> str:
-    del meta
-    return "set"
+    try:
+        subtype, submeta = meta[0]
+    except TypeError:
+        subtype, submeta = meta[0], None
+    return f"Set[{_get_python_type(subtype, True, [submeta])}]"
