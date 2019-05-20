@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import List
+from typing import List, Optional
 
 import thriftpy2 as thriftpy
 from thriftpyi.entities import (
@@ -74,7 +74,9 @@ def parse_structs(module: InterfaceProxy) -> List[Struct]:
     ]
 
 
-def parse_service(service: ServiceProxy) -> Service:
+def parse_service(service: Optional[ServiceProxy]) -> Optional[Service]:
+    if service is None:
+        return None
     return Service(
         name=service.name,
         methods=[

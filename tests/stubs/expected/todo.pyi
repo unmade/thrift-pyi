@@ -3,6 +3,7 @@ from enum import IntEnum
 from typing import *
 
 from . import shared
+from . import dates
 
 class TodoType(IntEnum):
     PLAIN = 1
@@ -14,6 +15,7 @@ class TodoItem:
     id: int
     text: str
     type: int
+    created: dates.DateTime
 
 class Todo:
     def create(self, text: str, type: int) -> None: ...

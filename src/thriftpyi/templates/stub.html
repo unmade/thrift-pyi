@@ -3,7 +3,7 @@ from enum import IntEnum
 from typing import *
 
 
-{% for import in imports %}
+{% for import in imports -%}
 from . import {{ import }}
 {% endfor %}
 
@@ -33,6 +33,7 @@ class {{ struct.name }}:
 {% endfor %}
 
 
+{% if service %}
 class {{ service.name }}:
 {% for method in service.methods %}
     def {{ method.name }}(
@@ -43,3 +44,4 @@ class {{ service.name }}:
     ) -> {{ method.return_type }}:
         ...
 {% endfor %}
+{% endif %}

@@ -1,6 +1,7 @@
 namespace * todo
 
 include "shared.thrift"
+include "dates.thrift"
 
 
 enum TodoType {
@@ -14,6 +15,7 @@ struct TodoItem {
     1: required i32 id
     2: required string text
     3: required TodoType type
+    4: required dates.DateTime created
 }
 
 typedef list<TodoItem> TodoItemList
