@@ -11,13 +11,21 @@ enum TodoType {
 
 
 struct TodoItem {
-    1: required string text
-    2: required TodoType type
+    1: required i32 id
+    2: required string text
+    3: required TodoType type
 }
+
+typedef list<TodoItem> TodoItemList
 
 
 service Todo extends shared.Service {
     void create(
         1: string text,
+        2: TodoType type,
     )
+    TodoItem get(
+        1: i32 id,
+    )
+    TodoItemList all()
 }

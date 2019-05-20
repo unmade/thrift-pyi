@@ -10,11 +10,11 @@ class InterfaceProxy:
 
     def get_service(self) -> "ServiceProxy":
         return ServiceProxy(
-            next(
+            [
                 member
                 for member in self.module.__dict__.values()
                 if hasattr(member, "thrift_services")
-            )
+            ][0]
         )
 
     def get_imports(self) -> Dict[str, ModuleType]:
@@ -109,32 +109,43 @@ class ServiceProxy:
 class VarProxy:
     def __init__(self, thrift_spec: tuple):
         ttype, name, *meta, _ = thrift_spec
-        self._ttype = ttype
-        self.name = name
+        self._ttype: int = ttype
+        self.name: str = name
         self._meta = meta
-        self._is_required = True
+        self._is_required: bool = True
 
     def reveal_type(self) -> str:
-        type_map = {
-            TType.BOOL: "bool",
-            TType.DOUBLE: "float",
-            TType.BYTE: "int",
-            TType.I16: "int",
-            TType.I32: "int",
-            TType.I64: "int",
-            TType.STRING: "str",
-            TType.STRUCT: "Any",
-            TType.MAP: "dict",
-            TType.SET: "set",
-            TType.LIST: "list",
-        }
-        pytype = type_map.get(self._ttype, "Any")
-        if not self._is_required:
-            pytype = f"Optional[{pytype}]"
-        return pytype
+        return _get_python_type(self._ttype, self._is_required, self._meta)
 
 
 class FieldProxy(VarProxy):
     def __init__(self, thrift_spec: tuple):
         super().__init__(thrift_spec)
         self._is_required = thrift_spec[-1]
+
+
+def _get_python_type(ttype: int, is_required: bool, meta=None) -> str:
+    type_map = {
+        TType.BOOL: "bool",
+        TType.DOUBLE: "float",
+        TType.BYTE: "int",
+        TType.I16: "int",
+        TType.I32: "int",
+        TType.I64: "int",
+        TType.STRING: "str",
+        TType.STRUCT: "Any",
+        TType.MAP: "dict",
+        TType.SET: "set",
+        TType.LIST: "list",
+    }
+    pytype = type_map.get(ttype, "Any")
+    if meta:
+        subtype = meta[0]
+        if ttype == TType.STRUCT:
+            pytype = subtype.__name__
+        if ttype == TType.LIST:
+            subtype, meta = subtype
+            pytype = f"List[{_get_python_type(subtype, True, [meta])}]"
+    if not is_required:
+        pytype = f"Optional[{pytype}]"
+    return pytype
