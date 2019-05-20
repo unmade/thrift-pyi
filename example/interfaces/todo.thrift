@@ -36,4 +36,8 @@ service Todo extends shared.Service {
     TodoItemList filter(
         1: list<i32> ids
     )
+
+    map<i32, i64> stats(
+
+    )
 }

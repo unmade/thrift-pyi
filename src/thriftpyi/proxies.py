@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, List
+from typing import Dict, List, cast
 
 from thriftpy2.thrift import TPayloadMeta, TType
 
@@ -126,29 +126,78 @@ class FieldProxy(VarProxy):
 
 def _get_python_type(ttype: int, is_required: bool, meta=None) -> str:
     type_map = {
-        TType.BOOL: "bool",
-        TType.DOUBLE: "float",
-        TType.BYTE: "int",
-        TType.I16: "int",
-        TType.I32: "int",
-        TType.I64: "int",
-        TType.STRING: "str",
-        TType.STRUCT: "Any",
-        TType.MAP: "dict",
-        TType.SET: "set",
-        TType.LIST: "list",
+        TType.BOOL: _get_bool,
+        TType.DOUBLE: _get_double,
+        TType.BYTE: _get_byte,
+        TType.I16: _get_i16,
+        TType.I32: _get_i32,
+        TType.I64: _get_i64,
+        TType.STRING: _get_str,
+        TType.STRUCT: _get_struct,
+        TType.MAP: _get_map,
+        TType.SET: _get_set,
+        TType.LIST: _get_list,
     }
-    pytype = type_map.get(ttype, "Any")
-    if meta:
-        subtype = meta[0]
-        if ttype == TType.STRUCT:
-            pytype = subtype.__name__
-        if ttype == TType.LIST:
-            try:
-                subtype, meta = subtype
-            except TypeError:
-                meta = None
-            pytype = f"List[{_get_python_type(subtype, True, [meta])}]"
+    pytype = type_map[ttype](meta)
     if not is_required:
         pytype = f"Optional[{pytype}]"
     return pytype
+
+
+def _get_bool(meta) -> str:
+    del meta
+    return "bool"
+
+
+def _get_double(meta) -> str:
+    del meta
+    return "float"
+
+
+def _get_byte(meta) -> str:
+    del meta
+    return "int"
+
+
+def _get_i16(meta) -> str:
+    del meta
+    return "int"
+
+
+def _get_i32(meta) -> str:
+    del meta
+    return "int"
+
+
+def _get_i64(meta) -> str:
+    del meta
+    return "int"
+
+
+def _get_str(meta) -> str:
+    del meta
+    return "str"
+
+
+def _get_struct(meta) -> str:
+    return cast(str, meta[0].__name__)
+
+
+def _get_list(meta) -> str:
+    try:
+        subtype, submeta = meta[0]
+    except TypeError:
+        subtype, submeta = meta[0], None
+    return f"List[{_get_python_type(subtype, True, [submeta])}]"
+
+
+def _get_map(meta) -> str:
+    key, value = meta[0]
+    key = _get_python_type(key, True)
+    value = _get_python_type(value, True)
+    return f"Dict[{key}, {value}]"
+
+
+def _get_set(meta) -> str:
+    del meta
+    return "set"
