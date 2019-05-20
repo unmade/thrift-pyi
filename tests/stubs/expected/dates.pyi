@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from enum import IntEnum
 from typing import *
-
 @dataclass
 class DateTime:
     year: int

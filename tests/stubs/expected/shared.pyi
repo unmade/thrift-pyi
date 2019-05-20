@@ -7,8 +7,8 @@ class NotFound(Exception):
 
 @dataclass
 class LimitOffset:
-    limit: int
-    offset: int
+    limit: Optional[int]
+    offset: Optional[int]
 
 class Service:
     def ping(self,) -> str: ...

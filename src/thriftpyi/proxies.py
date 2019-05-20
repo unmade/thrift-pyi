@@ -52,7 +52,8 @@ class StructProxy:
 
     def get_fields(self) -> List["VarProxy"]:
         return [
-            VarProxy(thrift_spec) for thrift_spec in self._tstruct.thrift_spec.values()
+            FieldProxy(thrift_spec)
+            for thrift_spec in self._tstruct.thrift_spec.values()
         ]
 
 

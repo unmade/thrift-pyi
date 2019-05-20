@@ -35,7 +35,7 @@ class {{ struct.name }}:
 
 {% for service in services %}
 class {{ service.name }}:
-{% for method in service.methods %}
+{%- for method in service.methods %}
     def {{ method.name }}(
         self,
 {%- for arg in method.args %}
@@ -43,5 +43,7 @@ class {{ service.name }}:
 {%- endfor %}
     ) -> {{ method.return_type }}:
         ...
+{%- else %}
+    pass
 {% endfor %}
 {% endfor %}

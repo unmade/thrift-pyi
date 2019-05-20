@@ -6,7 +6,7 @@ from thriftpyi.main import thriftpyi
 
 def test_thriftpyi():
     thriftpyi("example/interfaces", "tests/stubs/actual/")
-    pyi_files = ["shared.pyi", "todo.pyi"]
+    pyi_files = ["dates.pyi", "shared.pyi", "todo.pyi", "todo_v2.pyi"]
     match, mismatch, errors = filecmp.cmpfiles(
         "tests/stubs/actual", "tests/stubs/expected", pyi_files
     )
