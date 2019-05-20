@@ -44,4 +44,8 @@ service Todo extends shared.Service {
     set<i16> types(
 
     )
+
+    map<TodoType, TodoItemList> groupby(
+
+    )
 }

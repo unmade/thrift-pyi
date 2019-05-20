@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 from thriftpy2.thrift import TPayloadMeta, TType
 
@@ -127,7 +127,7 @@ class FieldProxy(VarProxy):
         self._is_required = thrift_spec[-1]
 
 
-def _get_python_type(ttype: int, is_required: bool, meta=None) -> str:
+def _get_python_type(ttype: int, is_required: bool, meta: List) -> str:
     type_map = {
         TType.BOOL: _get_bool,
         TType.DOUBLE: _get_double,
@@ -147,63 +147,67 @@ def _get_python_type(ttype: int, is_required: bool, meta=None) -> str:
     return pytype
 
 
-def _get_bool(meta) -> str:
+def _get_bool(meta: List) -> str:
     del meta
     return "bool"
 
 
-def _get_double(meta) -> str:
+def _get_double(meta: List) -> str:
     del meta
     return "float"
 
 
-def _get_byte(meta) -> str:
+def _get_byte(meta: List) -> str:
     del meta
     return "int"
 
 
-def _get_i16(meta) -> str:
+def _get_i16(meta: List) -> str:
     del meta
     return "int"
 
 
-def _get_i32(meta) -> str:
+def _get_i32(meta: List) -> str:
     del meta
     return "int"
 
 
-def _get_i64(meta) -> str:
+def _get_i64(meta: List) -> str:
     del meta
     return "int"
 
 
-def _get_str(meta) -> str:
+def _get_str(meta: List) -> str:
     del meta
     return "str"
 
 
-def _get_struct(meta) -> str:
+def _get_struct(meta: List) -> str:
     return f"{meta[0].__module__}.{meta[0].__name__}"
 
 
-def _get_list(meta) -> str:
-    try:
-        subtype, submeta = meta[0]
-    except TypeError:
-        subtype, submeta = meta[0], None
-    return f"List[{_get_python_type(subtype, True, [submeta])}]"
+def _get_list(meta: List) -> str:
+    subttype, submeta = _unpack_meta(meta)
+    return f"List[{_get_python_type(subttype, True, submeta)}]"
 
 
-def _get_map(meta) -> str:
+def _get_map(meta: List) -> str:
     key, value = meta[0]
-    key = _get_python_type(key, True)
-    value = _get_python_type(value, True)
-    return f"Dict[{key}, {value}]"
+    key_ttype, key_meta = _unpack_meta([key])
+    value_ttype, value_meta = _unpack_meta([value])
+    key_pytype = _get_python_type(key_ttype, True, key_meta)
+    value_pytype = _get_python_type(value_ttype, True, value_meta)
+    return f"Dict[{key_pytype}, {value_pytype}]"
 
 
-def _get_set(meta) -> str:
+def _get_set(meta: List) -> str:
+    subttype, submeta = _unpack_meta(meta)
+    return f"Set[{_get_python_type(subttype, True, submeta)}]"
+
+
+def _unpack_meta(meta: List) -> Tuple[int, List]:
     try:
-        subtype, submeta = meta[0]
+        subttype, submeta = meta[0]
     except TypeError:
-        subtype, submeta = meta[0], None
-    return f"Set[{_get_python_type(subtype, True, [submeta])}]"
+        subttype, submeta = meta[0], None
+    return subttype, [submeta]
