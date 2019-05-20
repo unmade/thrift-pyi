@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, List, cast
+from typing import Dict, List
 
 from thriftpy2.thrift import TPayloadMeta, TType
 
@@ -50,6 +50,7 @@ class StructProxy:
     def __init__(self, tstruct: TPayloadMeta):
         self._tstruct = tstruct
         self.name = tstruct.__name__
+        self.module_name = tstruct.__module__
 
     def get_fields(self) -> List["VarProxy"]:
         return [
@@ -61,6 +62,7 @@ class ExceptionProxy:
     def __init__(self, texc: TPayloadMeta):
         self._texc = texc
         self.name = texc.__name__
+        self.module_name = texc.__module__
 
     def get_fields(self) -> List["FieldProxy"]:
         return [
@@ -78,6 +80,7 @@ class EnumProxy:
     def __init__(self, tenum: TPayloadMeta):
         self._tenum = tenum
         self.name = tenum.__name__
+        self.module_name = tenum.__module__
 
     def get_fields(self) -> List["EnumFieldProxy"]:
         fields = self._tenum._NAMES_TO_VALUES  # pylint: disable=protected-access
@@ -87,10 +90,8 @@ class EnumProxy:
 class ServiceProxy:
     def __init__(self, service):
         self.service = service
-
-    @property
-    def name(self):
-        return self.service.__name__
+        self.name = service.__name__
+        self.module_name = service.__module__
 
     def get_methods(self) -> List[str]:
         return [name for name in self.service.thrift_services]
@@ -103,7 +104,7 @@ class ServiceProxy:
         returns = getattr(self.service, f"{method_name}_result").thrift_spec.get(0)
         if returns is None:
             return "None"
-        return VarProxy(returns).reveal_type()
+        return VarProxy(returns).reveal_type_for(self.module_name)
 
 
 class VarProxy:
@@ -114,8 +115,10 @@ class VarProxy:
         self._meta = meta
         self._is_required: bool = True
 
-    def reveal_type(self) -> str:
-        return _get_python_type(self._ttype, self._is_required, self._meta)
+    def reveal_type_for(self, module_name: str) -> str:
+        pytype = _get_python_type(self._ttype, self._is_required, self._meta)
+        start, _, end = pytype.rpartition(f"{module_name}.")
+        return start + end
 
 
 class FieldProxy(VarProxy):
@@ -180,7 +183,7 @@ def _get_str(meta) -> str:
 
 
 def _get_struct(meta) -> str:
-    return cast(str, meta[0].__name__)
+    return f"{meta[0].__module__}.{meta[0].__name__}"
 
 
 def _get_list(meta) -> str:

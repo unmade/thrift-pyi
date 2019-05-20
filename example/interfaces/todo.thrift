@@ -30,7 +30,7 @@ service Todo extends shared.Service {
     )
 
     TodoItemList all(
-
+        1: shared.LimitOffset pager
     )
 
     TodoItemList filter(
