@@ -24,8 +24,16 @@ service Todo extends shared.Service {
         1: string text,
         2: TodoType type,
     )
+
     TodoItem get(
         1: i32 id,
     )
-    TodoItemList all()
+
+    TodoItemList all(
+
+    )
+
+    TodoItemList filter(
+        1: list<i32> ids
+    )
 }

@@ -144,7 +144,10 @@ def _get_python_type(ttype: int, is_required: bool, meta=None) -> str:
         if ttype == TType.STRUCT:
             pytype = subtype.__name__
         if ttype == TType.LIST:
-            subtype, meta = subtype
+            try:
+                subtype, meta = subtype
+            except TypeError:
+                meta = None
             pytype = f"List[{_get_python_type(subtype, True, [meta])}]"
     if not is_required:
         pytype = f"Optional[{pytype}]"
