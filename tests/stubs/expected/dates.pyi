@@ -10,3 +10,7 @@ class DateTime:
     minute: int
     second: int
     microsecond: Optional[int]
+
+@dataclass
+class Date:
+    pass

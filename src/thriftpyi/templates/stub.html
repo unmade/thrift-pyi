@@ -29,6 +29,8 @@ class {{ enum.name }}(IntEnum):
 class {{ struct.name }}:
 {%- for field in struct.fields %}
     {{ field.name }}: {{ field.type }}
+{%- else %}
+    pass
 {%- endfor %}
 {% endfor %}
 

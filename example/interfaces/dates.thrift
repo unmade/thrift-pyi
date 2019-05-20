@@ -9,3 +9,7 @@ struct DateTime {
     6: required byte second,
     7: optional i64 microsecond
 }
+
+struct Date {
+
+}
