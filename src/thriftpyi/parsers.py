@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import List, Optional
+from typing import List
 
 import thriftpy2 as thriftpy
 from thriftpyi.entities import (
@@ -13,7 +13,7 @@ from thriftpyi.entities import (
     Service,
     Struct,
 )
-from thriftpyi.proxies import InterfaceProxy, ServiceProxy
+from thriftpyi.proxies import InterfaceProxy
 
 
 def parse(interface: str) -> Content:
@@ -23,7 +23,7 @@ def parse(interface: str) -> Content:
         errors=parse_errors(module),
         enums=parse_enums(module),
         structs=parse_structs(module),
-        service=parse_service(module.get_service()),
+        services=parse_services(module),
     )
 
 
@@ -74,20 +74,23 @@ def parse_structs(module: InterfaceProxy) -> List[Struct]:
     ]
 
 
-def parse_service(service: Optional[ServiceProxy]) -> Optional[Service]:
-    if service is None:
-        return None
-    return Service(
-        name=service.name,
-        methods=[
-            Method(
-                name=method_name,
-                args=[
-                    Arg(name=arg.name, type=arg.reveal_type_for(service.module_name))
-                    for arg in service.get_args_for(method_name)
-                ],
-                return_type=service.get_return_type_for(method_name),
-            )
-            for method_name in service.get_methods()
-        ],
-    )
+def parse_services(module: InterfaceProxy) -> List[Service]:
+    return [
+        Service(
+            name=service.name,
+            methods=[
+                Method(
+                    name=method_name,
+                    args=[
+                        Arg(
+                            name=arg.name, type=arg.reveal_type_for(service.module_name)
+                        )
+                        for arg in service.get_args_for(method_name)
+                    ],
+                    return_type=service.get_return_type_for(method_name),
+                )
+                for method_name in service.get_methods()
+            ],
+        )
+        for service in module.get_services()
+    ]

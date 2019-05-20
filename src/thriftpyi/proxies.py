@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Tuple
 
 from thriftpy2.thrift import TPayloadMeta, TType
 
@@ -8,17 +8,12 @@ class InterfaceProxy:
     def __init__(self, module: ModuleType):
         self.module = module
 
-    def get_service(self) -> Optional["ServiceProxy"]:
-        try:
-            return ServiceProxy(
-                next(
-                    member
-                    for member in self.module.__dict__.values()
-                    if hasattr(member, "thrift_services")
-                )
-            )
-        except StopIteration:
-            return None
+    def get_services(self) -> List["ServiceProxy"]:
+        return [
+            ServiceProxy(member)
+            for member in self.module.__dict__.values()
+            if hasattr(member, "thrift_services")
+        ]
 
     def get_imports(self) -> Dict[str, ModuleType]:
         return {

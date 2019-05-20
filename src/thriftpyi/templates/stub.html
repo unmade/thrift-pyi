@@ -33,7 +33,7 @@ class {{ struct.name }}:
 {% endfor %}
 
 
-{% if service %}
+{% for service in services %}
 class {{ service.name }}:
 {% for method in service.methods %}
     def {{ method.name }}(
@@ -44,4 +44,4 @@ class {{ service.name }}:
     ) -> {{ method.return_type }}:
         ...
 {% endfor %}
-{% endif %}
+{% endfor %}

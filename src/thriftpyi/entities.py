@@ -57,4 +57,4 @@ class Content:
     errors: List[Error]
     enums: List[Enumeration]
     structs: List[Struct]
-    service: Optional[Service]
+    services: List[Service]
