@@ -16,6 +16,7 @@ struct TodoItem {
     2: required string text
     3: required TodoType type
     4: required dates.DateTime created
+    5: required bool is_deleted
 }
 
 typedef list<TodoItem> TodoItemList
@@ -39,7 +40,7 @@ service Todo extends shared.Service {
         1: list<i32> ids
     )
 
-    map<i32, i64> stats(
+    map<i32, double> stats(
 
     )
 
