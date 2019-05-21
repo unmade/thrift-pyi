@@ -17,6 +17,7 @@ class TodoItem:
     type: int
     created: dates.DateTime
     is_deleted: bool
+    picture: Optional[str]
 
 class Todo:
     def create(self, text: str, type: int) -> None: ...
