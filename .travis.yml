@@ -32,6 +32,19 @@ after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
 
+after_success:
+  - pip install poetry
+  - poetry build
+
+deploy:
+  provider: pypi
+  user: $TEST_PYPI_USERNAME
+  password: $TEST_PYPI_PASSWORD
+  server: https://test.pypi.org/legacy/
+  distributions: "sdist bdist_wheel"
+  on:
+    tags: true
+
 notifications:
   email:
     on_success: never
