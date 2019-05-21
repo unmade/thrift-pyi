@@ -10,7 +10,7 @@ def test_thriftpyi():
     match, mismatch, errors = filecmp.cmpfiles(
         "tests/stubs/actual", "tests/stubs/expected", pyi_files
     )
-    assert match == pyi_files
-    assert mismatch == []
     assert errors == []
+    assert mismatch == []
+    assert match == pyi_files
     shutil.rmtree("tests/stubs/actual/")
