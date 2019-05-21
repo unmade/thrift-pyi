@@ -12,8 +12,6 @@ def test_thriftpyi():
         output_dir, "tests/stubs/expected", pyi_files
     )
     assert errors == []
-    assert mismatch == [], "\n\n".join(
-        [open(f"{output_dir}/{file}").read() for file in mismatch]
-    )
+    assert mismatch == []
     assert match == pyi_files
     shutil.rmtree("tests/stubs/actual/")

@@ -19,7 +19,7 @@ def _generate_stubs(interfaces: List[str], output_dir: str) -> None:
 
 
 def _generate_init(interfaces: List[str], output_dir: str) -> None:
-    imports = [files.get_name(interface) for interface in interfaces]
+    imports = sorted([files.get_name(interface) for interface in interfaces])
     _generate(Content(imports=imports), "__init__.pyi", output_dir)
 
 
