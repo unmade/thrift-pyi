@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import List, Optional
 
 
@@ -53,8 +53,8 @@ class Struct:
 
 @dataclass
 class Content:
-    imports: List[str]
-    errors: List[Error]
-    enums: List[Enumeration]
-    structs: List[Struct]
-    services: List[Service]
+    imports: List[str] = field(default_factory=list)
+    errors: List[Error] = field(default_factory=list)
+    enums: List[Enumeration] = field(default_factory=list)
+    structs: List[Struct] = field(default_factory=list)
+    services: List[Service] = field(default_factory=list)

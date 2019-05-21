@@ -9,7 +9,7 @@ def save(data: str, to: str) -> None:
         f.write(data)
 
 
-def list_interfaces(interfaces_dir) -> List[str]:
+def list_interfaces(interfaces_dir: str) -> List[str]:
     interfaces = []
     for root, _, files in os.walk(interfaces_dir):
         interfaces.extend(
@@ -18,5 +18,9 @@ def list_interfaces(interfaces_dir) -> List[str]:
     return interfaces
 
 
-def build_output_path(interface, output_dir) -> str:
+def build_output_path(interface: str, output_dir: str) -> str:
     return os.path.join(output_dir, Path(interface).name.replace(".thrift", ".pyi"))
+
+
+def get_name(path: str) -> str:
+    return Path(path).name[: -len(Path(path).suffix)]
