@@ -21,6 +21,7 @@ python = "^3.7"
 click = "^7.0"
 jinja2 = "^2.10"
 black = "=19.3b0"
+thriftpy2 = "^0.4.2"
 
 [tool.poetry.dev-dependencies]
 
