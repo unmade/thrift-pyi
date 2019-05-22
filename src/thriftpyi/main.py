@@ -10,7 +10,9 @@ def thriftpyi(interfaces_dir: str, output_dir: str) -> None:
     interfaces = files.list_interfaces(interfaces_dir)
     _generate_stubs(interfaces, output_dir)
     _generate_init(interfaces, output_dir)
-    subprocess.check_call(["black", "--quiet", f"{Path(output_dir).resolve()}"])
+    path = Path(output_dir).resolve()
+    subprocess.check_call([f"autoflake -i -r {path.joinpath('*')}"], shell=True)
+    subprocess.check_call(["black", "--quiet", f"{path}"])
 
 
 def _generate_stubs(interfaces: List[str], output_dir: str) -> None:
