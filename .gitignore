@@ -1,3 +1,5 @@
+tests/stubs/actual
+
 *.egg-info
 pip-wheel-metadata
 dist
