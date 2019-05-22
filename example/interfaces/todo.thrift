@@ -24,13 +24,21 @@ typedef list<TodoItem> TodoItemList
 
 
 service Todo extends shared.Service {
-    void create(
+    i32 create(
         1: string text,
         2: TodoType type,
     )
 
+    void update(
+        1: i32 id,
+        2: string text,
+        3: TodoType type,
+    )
+
     TodoItem get(
         1: i32 id,
+    ) throws (
+        1: shared.NotFound not_found,
     )
 
     TodoItemList all(
