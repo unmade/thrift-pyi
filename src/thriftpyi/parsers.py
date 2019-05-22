@@ -40,7 +40,11 @@ def parse_errors(module: InterfaceProxy) -> List[Error]:
         Error(
             name=error.name,
             fields=[
-                Field(name=field.name, type=field.reveal_type_for(error.module_name))
+                Field(
+                    name=field.name,
+                    type=field.reveal_type_for(error.module_name),
+                    value=field.value,
+                )
                 for field in error.get_fields()
             ],
         )
@@ -66,7 +70,11 @@ def parse_structs(module: InterfaceProxy) -> List[Struct]:
         Struct(
             name=struct.name,
             fields=[
-                Field(name=field.name, type=field.reveal_type_for(struct.module_name))
+                Field(
+                    name=field.name,
+                    type=field.reveal_type_for(struct.module_name),
+                    value=field.value,
+                )
                 for field in struct.get_fields()
             ],
         )

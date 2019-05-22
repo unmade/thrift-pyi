@@ -25,10 +25,8 @@ class Dispatcher(object):
                 hour=created.hour,
                 minute=created.minute,
                 second=created.second,
-                microsecond=created.microsecond,
             ),
             is_deleted=False,
-            picture=None,
         )
         return todo_id
 

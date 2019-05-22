@@ -6,8 +6,8 @@ from thriftpyi.cli import main
 
 
 def test_main():
-    output_dir = "tests/stubs/actual"
     input_dir = "example/interfaces"
+    output_dir = "tests/stubs/actual"
     expected_dir = "tests/stubs/expected"
     pyi_files = ["__init__.pyi", "dates.pyi", "shared.pyi", "todo.pyi", "todo_v2.pyi"]
     runner = CliRunner()

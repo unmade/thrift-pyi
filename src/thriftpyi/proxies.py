@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 from thriftpy2.thrift import TPayloadMeta, TType
 
@@ -118,6 +118,12 @@ class VarProxy:
         pytype = _get_python_type(self._ttype, self._is_required, self._meta)
         start, _, end = pytype.rpartition(f"{module_name}.")
         return start + end
+
+    @property
+    def value(self) -> Optional[str]:
+        if not self._is_required:
+            return "None"
+        return None
 
 
 class FieldProxy(VarProxy):

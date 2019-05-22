@@ -25,6 +25,7 @@ class Service:
 class Field:
     name: str
     type: str
+    value: Optional[str]
 
 
 @dataclass

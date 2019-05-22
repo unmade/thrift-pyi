@@ -8,7 +8,7 @@ class DateTime:
     hour: int
     minute: int
     second: int
-    microsecond: Optional[int]
+    microsecond: Optional[int] = None
 
 @dataclass
 class Date:
