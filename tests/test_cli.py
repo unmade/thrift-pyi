@@ -1,12 +1,22 @@
+import filecmp
+import shutil
+
 from click.testing import CliRunner
 from thriftpyi.cli import main
 
 
-def test_main(mocker):
+def test_main():
+    output_dir = "tests/stubs/actual"
+    input_dir = "example/interfaces"
+    expected_dir = "tests/stubs/expected"
+    pyi_files = ["__init__.pyi", "dates.pyi", "shared.pyi", "todo.pyi", "todo_v2.pyi"]
     runner = CliRunner()
-    thriftpyi_mock = mocker.patch("thriftpyi.cli.thriftpyi")
-    result = runner.invoke(
-        main, ["--interfaces", "path/to/interfaces", "--output", "output/path"]
-    )
-    assert thriftpyi_mock.call_args == mocker.call("path/to/interfaces", "output/path")
+
+    result = runner.invoke(main, ["--interfaces", input_dir, "--output", output_dir])
     assert result.exit_code == 0
+
+    match, mismatch, errors = filecmp.cmpfiles(output_dir, expected_dir, pyi_files)
+    assert errors == []
+    assert mismatch == []
+    assert match == pyi_files
+    shutil.rmtree(output_dir)
