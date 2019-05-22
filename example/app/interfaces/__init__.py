@@ -4,7 +4,7 @@ from typing import Dict
 
 import thriftpy2
 
-interfaces_path = Path("example/interfaces")
+_interfaces_path = Path("example/interfaces")
 _interfaces: Dict[str, ModuleType] = {}
 
 
@@ -13,6 +13,6 @@ def __getattr__(name):
         return _interfaces[name]
     except KeyError:
         _interfaces[name] = thriftpy2.load(
-            str(interfaces_path.joinpath(f"{name}.thrift"))
+            str(_interfaces_path.joinpath(f"{name}.thrift"))
         )
         return _interfaces[name]

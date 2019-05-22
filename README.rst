@@ -4,61 +4,52 @@ Overview
 
 .. start-badges
 
-.. list-table::
-    :stub-columns: 1
-
-    * - tests
-      - | |travis|
-        | |requires|
-        | |codecov|
-        | |codacy|
-    * - package
-      - | |version| |wheel| |supported-versions| |supported-implementations|
-        | |commits-since|
-
-.. |travis| image:: https://travis-ci.org/unmade/thrift-pyi.svg?branch=master
+.. image:: https://travis-ci.org/unmade/thrift-pyi.svg?branch=master
     :alt: Travis-CI Build Status
     :target: https://travis-ci.org/unmade/thrift-pyi
 
-.. |requires| image:: https://requires.io/github/unmade/thrift-pyi/requirements.svg?branch=master
-    :alt: Requirements Status
-    :target: https://requires.io/github/unmade/thrift-pyi/requirements/?branch=master
-
-.. |codecov| image:: https://codecov.io/github/unmade/thrift-pyi/coverage.svg?branch=master
+.. image:: https://codecov.io/github/unmade/thrift-pyi/coverage.svg?branch=master
     :alt: Coverage Status
     :target: https://codecov.io/github/unmade/thrift-pyi
 
-.. |codacy| image:: https://api.codacy.com/project/badge/Grade/487480f045594e148309e8b7f1f71351
+.. image:: https://api.codacy.com/project/badge/Grade/487480f045594e148309e8b7f1f71351
     :alt: Codacy Badge
     :target: https://app.codacy.com/app/unmade/thrift-pyi
 
-.. |version| image:: https://img.shields.io/pypi/v/thriftpyi.svg
+.. image:: https://requires.io/github/unmade/thrift-pyi/requirements.svg?branch=master
+    :alt: Requirements Status
+    :target: https://requires.io/github/unmade/thrift-pyi/requirements/?branch=master
+
+.. image:: https://img.shields.io/pypi/v/thriftpyi.svg
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/thriftpyi
 
-.. |commits-since| image:: https://img.shields.io/github/commits-since/unmade/thrift-pyi/v0.1.0.svg
-    :alt: Commits since latest release
-    :target: https://github.com/unmade/thrift-pyi/compare/v0.1.0...master
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/thriftpyi.svg
+.. image:: https://img.shields.io/pypi/wheel/thriftpyi.svg
     :alt: PyPI Wheel
     :target: https://pypi.org/project/thriftpyi
 
-.. |supported-versions| image:: https://img.shields.io/pypi/pyversions/thriftpyi.svg
+.. image:: https://img.shields.io/pypi/pyversions/thriftpyi.svg
     :alt: Supported versions
     :target: https://pypi.org/project/thriftpyi
 
-.. |supported-implementations| image:: https://img.shields.io/pypi/implementation/thriftpyi.svg
-    :alt: Supported implementations
-    :target: https://pypi.org/project/thriftpyi
+.. image:: https://img.shields.io/badge/License-MIT-purple.svg
+    :alt: MIT License
+    :target: https://github.com/unmade/thrift-pyi/blob/master/LICENSE
 
 .. end-badges
 
-This is simple `.pyi` stubs generator from thrift interfaces
+This is simple `.pyi` stubs generator from thrift interfaces.
+Motivation for this project was to have autocomplete and type checking
+for dynamically loaded thrift interfaces
 
-* Free software: MIT license
+Installation
+============
 
-Documentation
+.. code-block:: bash
+
+    pip install thriftpyi
+
+Quickstart
 =============
 
 Sample usage:
@@ -66,6 +57,31 @@ Sample usage:
 .. code-block:: bash
 
     $ thriftpyi example/interfaces --output example/app/interfaces
+
+Additionally to generated stubs it is required to create `__init__.py` that will load thrift interfaces, for example:
+
+.. code-block:: python
+
+    from pathlib import Path
+    from types import ModuleType
+    from typing import Dict
+
+    import thriftpy2
+
+    _interfaces_path = Path("example/interfaces")
+    _interfaces: Dict[str, ModuleType] = {}
+
+
+    def __getattr__(name):
+        try:
+            return _interfaces[name]
+        except KeyError:
+            _interfaces[name] = thriftpy2.load(
+                str(_interfaces_path.joinpath(f"{name}.thrift"))
+            )
+            return _interfaces[name]
+
+To see more detailed example of usage refer to `example app <https://github.com/unmade/thrift-pyi/blob/master/example>`_
 
 Development
 ===========
