@@ -18,6 +18,7 @@ struct TodoItem {
     4: required dates.DateTime created
     5: required bool is_deleted
     6: optional binary picture
+    7: optional bool is_favorite = false
 }
 
 typedef list<TodoItem> TodoItemList
@@ -30,9 +31,7 @@ service Todo extends shared.Service {
     )
 
     void update(
-        1: i32 id,
-        2: string text,
-        3: TodoType type,
+        1: TodoItem item
     )
 
     TodoItem get(

@@ -50,9 +50,10 @@ class StructProxy:
         self.name = tstruct.__name__
         self.module_name = tstruct.__module__
 
-    def get_fields(self) -> List["VarProxy"]:
+    def get_fields(self) -> List["FieldProxy"]:
+        default_spec = dict(self._tstruct.default_spec)
         return [
-            FieldProxy(thrift_spec)
+            FieldProxy(thrift_spec, default_value=default_spec[thrift_spec[1]])
             for thrift_spec in self._tstruct.thrift_spec.values()
         ]
 
@@ -64,8 +65,10 @@ class ExceptionProxy:
         self.module_name = texc.__module__
 
     def get_fields(self) -> List["FieldProxy"]:
+        default_spec = dict(self._texc.default_spec)
         return [
-            FieldProxy(thrift_spec) for thrift_spec in self._texc.thrift_spec.values()
+            FieldProxy(thrift_spec, default_value=default_spec[thrift_spec[1]])
+            for thrift_spec in self._texc.thrift_spec.values()
         ]
 
 
@@ -119,17 +122,18 @@ class VarProxy:
         start, _, end = pytype.rpartition(f"{module_name}.")
         return start + end
 
-    @property
-    def value(self) -> Optional[str]:
-        if not self._is_required:
-            return "None"
-        return None
-
 
 class FieldProxy(VarProxy):
-    def __init__(self, thrift_spec: tuple):
+    def __init__(self, thrift_spec: tuple, default_value):
         super().__init__(thrift_spec)
-        self._is_required = thrift_spec[-1]
+        self._is_required = thrift_spec[-1] or default_value is not None
+        self._has_default_value = not thrift_spec[-1]
+        self._default_value = default_value
+
+    def reveal_value(self) -> Optional[str]:
+        if self._has_default_value:
+            return f"{self._default_value}"
+        return None
 
 
 def _get_python_type(ttype: int, is_required: bool, meta: List) -> str:
