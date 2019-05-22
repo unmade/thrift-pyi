@@ -58,7 +58,7 @@ Sample usage:
 
     $ thriftpyi example/interfaces --output example/app/interfaces
 
-Additionally to generated stubs it is required to create `__init__.py` that will load thrift interfaces, for example:
+Additionally to generated stubs you might want to create `__init__.py` that will load thrift interfaces, for example:
 
 .. code-block:: python
 
@@ -76,10 +76,10 @@ Additionally to generated stubs it is required to create `__init__.py` that will
         try:
             return _interfaces[name]
         except KeyError:
-            _interfaces[name] = thriftpy2.load(
-                str(_interfaces_path.joinpath(f"{name}.thrift"))
-            )
-            return _interfaces[name]
+            interface = thriftpy2.load(str(_interfaces_path.joinpath(f"{name}.thrift")))
+            _interfaces[name] = interface
+            return interface
+
 
 To see more detailed example of usage refer to `example app <https://github.com/unmade/thrift-pyi/blob/master/example>`_
 

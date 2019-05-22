@@ -12,7 +12,6 @@ def __getattr__(name):
     try:
         return _interfaces[name]
     except KeyError:
-        _interfaces[name] = thriftpy2.load(
-            str(_interfaces_path.joinpath(f"{name}.thrift"))
-        )
-        return _interfaces[name]
+        interface = thriftpy2.load(str(_interfaces_path.joinpath(f"{name}.thrift")))
+        _interfaces[name] = interface
+        return interface
