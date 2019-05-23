@@ -83,6 +83,33 @@ Additionally to generated stubs you might want to create `__init__.py` that will
 
 To see more detailed example of usage refer to `example app <https://github.com/unmade/thrift-pyi/blob/master/example>`_
 
+Caveats
+=======
+
+Python and thrift are very different at argument handling.
+For example in thrift the following will be correct declaration:
+
+.. code-block:: thrift
+
+    struct TodoItem {
+        1: required i32 id
+        3: optional i32 type = 1
+        2: required string text
+    }
+
+In python attributes without a default cannot follow attributes with one.
+Nevertheless, library doesn't enforce any checks with that case and will generate `.pyi` as is:
+
+.. code-block:: python
+
+    from dataclasses import dataclass
+
+    @dataclass
+    class TodoItem:
+        id: int
+        type: int = 1
+        text: str
+
 Development
 ===========
 
