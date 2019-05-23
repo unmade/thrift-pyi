@@ -20,15 +20,15 @@ Overview
     :alt: Requirements Status
     :target: https://requires.io/github/unmade/thrift-pyi/requirements/?branch=master
 
-.. image:: https://img.shields.io/pypi/v/thriftpyi.svg
+.. image:: https://img.shields.io/pypi/v/thrift-pyi.svg
     :alt: PyPI Package latest release
     :target: https://pypi.org/project/thriftpyi
 
-.. image:: https://img.shields.io/pypi/wheel/thriftpyi.svg
+.. image:: https://img.shields.io/pypi/wheel/thrift-pyi.svg
     :alt: PyPI Wheel
     :target: https://pypi.org/project/thriftpyi
 
-.. image:: https://img.shields.io/pypi/pyversions/thriftpyi.svg
+.. image:: https://img.shields.io/pypi/pyversions/thrift-pyi.svg
     :alt: Supported versions
     :target: https://pypi.org/project/thriftpyi
 
