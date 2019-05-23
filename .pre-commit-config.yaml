@@ -15,6 +15,7 @@ repos:
     -   id: isort
         additional_dependencies:
         -   toml
+        exclude: "example/"
 -   repo: local
     hooks:
       - id: pylint
@@ -22,6 +23,7 @@ repos:
         entry: python3 -m pylint
         language: system
         types: [python]
+        exclude: "example/"
       - id: mypy
         name: mypy
         entry: python3 -m mypy
@@ -32,7 +34,6 @@ repos:
     rev: v2.1.0
     hooks:
     -   id: trailing-whitespace
-    -   id: end-of-file-fixer
     -   id: check-yaml
     -   id: debug-statements
     -   id: flake8

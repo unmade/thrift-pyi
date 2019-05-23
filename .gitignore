@@ -1,3 +1,9 @@
+tests/stubs/actual
+
+*.egg-info
+pip-wheel-metadata
+dist
+
 .tox
 
 __pycache__
