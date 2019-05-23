@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thrift-pyi"
-version = "0.1.0-alpha.4"
+version = "0.1.0-alpha.5"
 description = "This is simple `.pyi` stubs generator from thrift interfaces"
 authors = ["Aleksei Maslakov <lesha.maslakov@gmail.com>"]
 license = "MIT"
