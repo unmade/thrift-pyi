@@ -32,16 +32,14 @@ after_failure:
   - more .tox/log/* | cat
   - more .tox/*/log/* | cat
 
-after_success:
+before_deploy:
   - pip install poetry
+  - poetry config repositories.testpypi https://test.pypi.org/legacy/
   - poetry build
 
 deploy:
-  provider: pypi
-  user: $TEST_PYPI_USERNAME
-  password: $TEST_PYPI_PASSWORD
-  server: https://test.pypi.org/legacy/
-  distributions: "sdist bdist_wheel"
+  provider: script
+  script: poetry publish -r testpypi -u $TEST_PYPI_USERNAME -p $TEST_PYPI_PASSWORD
   on:
     tags: true
 
