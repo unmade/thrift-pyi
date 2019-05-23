@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thrift-pyi"
-version = "0.1.0-alpha.6"
+version = "0.1.0-beta.1"
 description = "This is simple `.pyi` stubs generator from thrift interfaces"
 readme = "README.rst"
 repository = "https://github.com/unmade/thrift-pyi"
@@ -16,11 +16,6 @@ classifiers = [
     "Topic :: Software Development :: Code Generators",
 ]
 
-[tool.isort]
-line_length = 88
-multi_line_output = 3
-include_trailing_comma = true
-
 [tool.poetry.scripts]
 thriftpyi = "thriftpyi.cli:main"
 
@@ -28,11 +23,16 @@ thriftpyi = "thriftpyi.cli:main"
 python = "^3.7"
 click = "^7.0"
 jinja2 = "^2.10"
-black = "=19.3b0"
+black = "^19.3b0"
 thriftpy2 = "^0.4.2"
 autoflake = "^1.3"
 
 [tool.poetry.dev-dependencies]
+
+[tool.isort]
+line_length = 88
+multi_line_output = 3
+include_trailing_comma = true
 
 [build-system]
 requires = ["poetry>=0.12"]
