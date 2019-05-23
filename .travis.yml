@@ -40,6 +40,7 @@ before_deploy:
 deploy:
   provider: script
   script: poetry publish -r testpypi -u $TEST_PYPI_USERNAME -p $TEST_PYPI_PASSWORD
+  skip_cleanup: true
   on:
     tags: true
 
