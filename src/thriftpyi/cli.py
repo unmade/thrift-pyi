@@ -4,7 +4,7 @@ from thriftpyi.main import thriftpyi
 
 @click.command()
 @click.argument("interfaces_dir", type=click.Path(exists=True))
-@click.option("--output", help="Directory where to save generated `.pyi` files")
+@click.option("--output", "-o", help="Directory where to save generated `.pyi` files")
 @click.option(
     "--async",
     "is_async",
