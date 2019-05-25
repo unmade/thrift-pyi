@@ -3,15 +3,16 @@ from typing import List, Optional
 
 
 @dataclass
-class Arg:
+class Field:
     name: str
     type: str
+    value: Optional[str] = None
 
 
 @dataclass
 class Method:
     name: str
-    args: List[Arg]
+    args: List[Field]
     return_type: Optional[str]
 
 
@@ -22,32 +23,7 @@ class Service:
 
 
 @dataclass
-class Field:
-    name: str
-    type: str
-    value: Optional[str]
-
-
-@dataclass
-class Error:
-    name: str
-    fields: List[Field]
-
-
-@dataclass
-class EnumField:
-    name: str
-    value: int
-
-
-@dataclass
-class Enumeration:
-    name: str
-    fields: List[EnumField]
-
-
-@dataclass
-class Struct:
+class Class:
     name: str
     fields: List[Field]
 
@@ -55,7 +31,7 @@ class Struct:
 @dataclass
 class Content:
     imports: List[str] = field(default_factory=list)
-    errors: List[Error] = field(default_factory=list)
-    enums: List[Enumeration] = field(default_factory=list)
-    structs: List[Struct] = field(default_factory=list)
+    errors: List[Class] = field(default_factory=list)
+    enums: List[Class] = field(default_factory=list)
+    structs: List[Class] = field(default_factory=list)
     services: List[Service] = field(default_factory=list)

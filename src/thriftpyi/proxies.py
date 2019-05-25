@@ -1,12 +1,14 @@
 from types import ModuleType
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional
 
-from thriftpy2.thrift import TPayloadMeta, TType
+import thriftpy2
+from thriftpy2.thrift import TPayloadMeta
+from thriftpyi.utils import get_python_type
 
 
 class InterfaceProxy:
-    def __init__(self, module: ModuleType):
-        self.module = module
+    def __init__(self, interface_path: str):
+        self.module = thriftpy2.load(interface_path)
 
     def get_services(self) -> List["ServiceProxy"]:
         return [
@@ -22,9 +24,9 @@ class InterfaceProxy:
             if isinstance(item, ModuleType)
         }
 
-    def get_errors(self) -> List["ExceptionProxy"]:
+    def get_errors(self) -> List["ClassProxy"]:
         return [
-            ExceptionProxy(member)
+            ClassProxy(member)
             for name, member in self.module.__dict__.items()
             if isinstance(member, TPayloadMeta) and hasattr(member, "args")
         ]
@@ -36,57 +38,36 @@ class InterfaceProxy:
             if hasattr(member, "_NAMES_TO_VALUES")
         ]
 
-    def get_structs(self) -> List["StructProxy"]:
+    def get_structs(self) -> List["ClassProxy"]:
         return [
-            StructProxy(member)
+            ClassProxy(member)
             for name, member in self.module.__dict__.items()
             if isinstance(member, TPayloadMeta) and not hasattr(member, "args")
         ]
 
 
-class StructProxy:
-    def __init__(self, tstruct: TPayloadMeta):
-        self._tstruct = tstruct
-        self.name = tstruct.__name__
-        self.module_name = tstruct.__module__
+class ClassProxy:
+    def __init__(self, tclass: TPayloadMeta):
+        self._tclass = tclass
+        self.name = tclass.__name__
+        self.module_name = tclass.__module__
 
     def get_fields(self) -> List["FieldProxy"]:
-        default_spec = dict(self._tstruct.default_spec)
+        default_spec = dict(self._tclass.default_spec)
         return [
-            FieldProxy(thrift_spec, default_value=default_spec[thrift_spec[1]])
-            for thrift_spec in self._tstruct.thrift_spec.values()
+            FieldProxy(thrift_spec, default_spec=default_spec)
+            for thrift_spec in self._tclass.thrift_spec.values()
         ]
 
 
-class ExceptionProxy:
-    def __init__(self, texc: TPayloadMeta):
-        self._texc = texc
-        self.name = texc.__name__
-        self.module_name = texc.__module__
-
+class EnumProxy(ClassProxy):
     def get_fields(self) -> List["FieldProxy"]:
-        default_spec = dict(self._texc.default_spec)
+        fields = self._tclass._NAMES_TO_VALUES  # pylint: disable=protected-access
+        ttype = self._tclass._ttype  # pylint: disable=protected-access
         return [
-            FieldProxy(thrift_spec, default_value=default_spec[thrift_spec[1]])
-            for thrift_spec in self._texc.thrift_spec.values()
+            FieldProxy((ttype, name, True), default_spec={name: value})
+            for name, value in fields.items()
         ]
-
-
-class EnumFieldProxy:
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-
-class EnumProxy:
-    def __init__(self, tenum: TPayloadMeta):
-        self._tenum = tenum
-        self.name = tenum.__name__
-        self.module_name = tenum.__module__
-
-    def get_fields(self) -> List["EnumFieldProxy"]:
-        fields = self._tenum._NAMES_TO_VALUES  # pylint: disable=protected-access
-        return [EnumFieldProxy(name, value) for name, value in fields.items()]
 
 
 class ServiceProxy:
@@ -118,105 +99,19 @@ class VarProxy:
         self._is_required: bool = True
 
     def reveal_type_for(self, module_name: str) -> str:
-        pytype = _get_python_type(self._ttype, self._is_required, self._meta)
+        pytype = get_python_type(self._ttype, self._is_required, self._meta)
         start, _, end = pytype.rpartition(f"{module_name}.")
         return start + end
 
 
 class FieldProxy(VarProxy):
-    def __init__(self, thrift_spec: tuple, default_value):
+    def __init__(self, thrift_spec: tuple, default_spec: Dict[str, str]):
         super().__init__(thrift_spec)
-        self._is_required = thrift_spec[-1] or default_value is not None
-        self._has_default_value = not thrift_spec[-1]
-        self._default_value = default_value
+        self._default_value = default_spec[self.name]
+        self._is_required = thrift_spec[-1] or self._default_value is not None
+        self._has_default_none = not thrift_spec[-1]
 
     def reveal_value(self) -> Optional[str]:
-        if self._has_default_value:
+        if self._has_default_none or self._default_value is not None:
             return f"{self._default_value}"
         return None
-
-
-def _get_python_type(ttype: int, is_required: bool, meta: List) -> str:
-    type_map = {
-        TType.BOOL: _get_bool,
-        TType.DOUBLE: _get_double,
-        TType.BYTE: _get_byte,
-        TType.I16: _get_i16,
-        TType.I32: _get_i32,
-        TType.I64: _get_i64,
-        TType.STRING: _get_str,
-        TType.STRUCT: _get_struct,
-        TType.MAP: _get_map,
-        TType.SET: _get_set,
-        TType.LIST: _get_list,
-    }
-    pytype = type_map[ttype](meta)
-    if not is_required:
-        pytype = f"Optional[{pytype}]"
-    return pytype
-
-
-def _get_bool(meta: List) -> str:
-    del meta
-    return "bool"
-
-
-def _get_double(meta: List) -> str:
-    del meta
-    return "float"
-
-
-def _get_byte(meta: List) -> str:
-    del meta
-    return "int"
-
-
-def _get_i16(meta: List) -> str:
-    del meta
-    return "int"
-
-
-def _get_i32(meta: List) -> str:
-    del meta
-    return "int"
-
-
-def _get_i64(meta: List) -> str:
-    del meta
-    return "int"
-
-
-def _get_str(meta: List) -> str:
-    del meta
-    return "str"
-
-
-def _get_struct(meta: List) -> str:
-    return f"{meta[0].__module__}.{meta[0].__name__}"
-
-
-def _get_list(meta: List) -> str:
-    subttype, submeta = _unpack_meta(meta)
-    return f"List[{_get_python_type(subttype, True, submeta)}]"
-
-
-def _get_map(meta: List) -> str:
-    key, value = meta[0]
-    key_ttype, key_meta = _unpack_meta([key])
-    value_ttype, value_meta = _unpack_meta([value])
-    key_pytype = _get_python_type(key_ttype, True, key_meta)
-    value_pytype = _get_python_type(value_ttype, True, value_meta)
-    return f"Dict[{key_pytype}, {value_pytype}]"
-
-
-def _get_set(meta: List) -> str:
-    subttype, submeta = _unpack_meta(meta)
-    return f"Set[{_get_python_type(subttype, True, submeta)}]"
-
-
-def _unpack_meta(meta: List) -> Tuple[int, List]:
-    try:
-        subttype, submeta = meta[0]
-    except TypeError:
-        subttype, submeta = meta[0], None
-    return subttype, [submeta]

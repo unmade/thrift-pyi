@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 from typing import List
 
-from thriftpyi import files, parsers, renderers
+from thriftpyi import factories, files, renderers
 from thriftpyi.entities import Content
 
 
@@ -17,7 +17,7 @@ def thriftpyi(interfaces_dir: str, output_dir: str) -> None:
 
 def _generate_stubs(interfaces: List[str], output_dir: str) -> None:
     for interface in interfaces:
-        _generate(parsers.parse(interface), interface, output_dir)
+        _generate(factories.make_content(interface), interface, output_dir)
 
 
 def _generate_init(interfaces: List[str], output_dir: str) -> None:
