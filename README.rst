@@ -39,7 +39,7 @@ Overview
 .. end-badges
 
 This is simple `.pyi` stubs generator from thrift interfaces.
-Motivation for this project was to have autocomplete and type checking
+Motivation for this project is to have autocomplete and type checking
 for dynamically loaded thrift interfaces
 
 Installation
