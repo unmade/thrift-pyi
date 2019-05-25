@@ -35,3 +35,4 @@ class Content:
     enums: List[Class] = field(default_factory=list)
     structs: List[Class] = field(default_factory=list)
     services: List[Service] = field(default_factory=list)
+    is_async: bool = False

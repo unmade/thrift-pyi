@@ -38,7 +38,7 @@ class {{ struct.name }}:
 {% for service in services %}
 class {{ service.name }}:
 {%- for method in service.methods %}
-    def {{ method.name }}(
+    {% if is_async %}async {% endif %}def {{ method.name }}(
         self,
 {%- for arg in method.args %}
         {{ arg.name }}: {{ arg.type }},
