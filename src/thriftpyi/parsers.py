@@ -1,18 +1,7 @@
-from types import ModuleType
 from typing import List
 
 import thriftpy2 as thriftpy
-from thriftpyi.entities import (
-    Arg,
-    Content,
-    Enumeration,
-    EnumField,
-    Error,
-    Field,
-    Method,
-    Service,
-    Struct,
-)
+from thriftpyi.entities import Class, Content, Field, Method, Service
 from thriftpyi.proxies import InterfaceProxy
 
 
@@ -28,16 +17,12 @@ def parse(interface: str) -> Content:
 
 
 def parse_imports(module: InterfaceProxy) -> List[str]:
-    return [
-        name
-        for name, item in module.get_imports().items()
-        if isinstance(item, ModuleType)
-    ]
+    return list(module.get_imports().keys())
 
 
-def parse_errors(module: InterfaceProxy) -> List[Error]:
+def parse_errors(module: InterfaceProxy) -> List[Class]:
     return [
-        Error(
+        Class(
             name=error.name,
             fields=[
                 Field(
@@ -52,12 +37,16 @@ def parse_errors(module: InterfaceProxy) -> List[Error]:
     ]
 
 
-def parse_enums(module: InterfaceProxy) -> List[Enumeration]:
+def parse_enums(module: InterfaceProxy) -> List[Class]:
     return [
-        Enumeration(
+        Class(
             name=enum.name,
             fields=[
-                EnumField(name=field.name, value=field.value)
+                Field(
+                    name=field.name,
+                    type=field.reveal_type_for(enum.module_name),
+                    value=field.reveal_value(),
+                )
                 for field in enum.get_fields()
             ],
         )
@@ -65,9 +54,9 @@ def parse_enums(module: InterfaceProxy) -> List[Enumeration]:
     ]
 
 
-def parse_structs(module: InterfaceProxy) -> List[Struct]:
+def parse_structs(module: InterfaceProxy) -> List[Class]:
     return [
-        Struct(
+        Class(
             name=struct.name,
             fields=[
                 Field(
@@ -90,7 +79,7 @@ def parse_services(module: InterfaceProxy) -> List[Service]:
                 Method(
                     name=method_name,
                     args=[
-                        Arg(
+                        Field(
                             name=arg.name, type=arg.reveal_type_for(service.module_name)
                         )
                         for arg in service.get_args_for(method_name)

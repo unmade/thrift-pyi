@@ -22,9 +22,9 @@ class InterfaceProxy:
             if isinstance(item, ModuleType)
         }
 
-    def get_errors(self) -> List["ExceptionProxy"]:
+    def get_errors(self) -> List["ClassProxy"]:
         return [
-            ExceptionProxy(member)
+            ClassProxy(member)
             for name, member in self.module.__dict__.items()
             if isinstance(member, TPayloadMeta) and hasattr(member, "args")
         ]
@@ -36,57 +36,36 @@ class InterfaceProxy:
             if hasattr(member, "_NAMES_TO_VALUES")
         ]
 
-    def get_structs(self) -> List["StructProxy"]:
+    def get_structs(self) -> List["ClassProxy"]:
         return [
-            StructProxy(member)
+            ClassProxy(member)
             for name, member in self.module.__dict__.items()
             if isinstance(member, TPayloadMeta) and not hasattr(member, "args")
         ]
 
 
-class StructProxy:
-    def __init__(self, tstruct: TPayloadMeta):
-        self._tstruct = tstruct
-        self.name = tstruct.__name__
-        self.module_name = tstruct.__module__
+class ClassProxy:
+    def __init__(self, tclass: TPayloadMeta):
+        self._tclass = tclass
+        self.name = tclass.__name__
+        self.module_name = tclass.__module__
 
     def get_fields(self) -> List["FieldProxy"]:
-        default_spec = dict(self._tstruct.default_spec)
+        default_spec = dict(self._tclass.default_spec)
         return [
             FieldProxy(thrift_spec, default_value=default_spec[thrift_spec[1]])
-            for thrift_spec in self._tstruct.thrift_spec.values()
+            for thrift_spec in self._tclass.thrift_spec.values()
         ]
 
 
-class ExceptionProxy:
-    def __init__(self, texc: TPayloadMeta):
-        self._texc = texc
-        self.name = texc.__name__
-        self.module_name = texc.__module__
-
+class EnumProxy(ClassProxy):
     def get_fields(self) -> List["FieldProxy"]:
-        default_spec = dict(self._texc.default_spec)
+        fields = self._tclass._NAMES_TO_VALUES  # pylint: disable=protected-access
+        ttype = self._tclass._ttype  # pylint: disable=protected-access
         return [
-            FieldProxy(thrift_spec, default_value=default_spec[thrift_spec[1]])
-            for thrift_spec in self._texc.thrift_spec.values()
+            FieldProxy((ttype, name, True), default_value=value)
+            for name, value in fields.items()
         ]
-
-
-class EnumFieldProxy:
-    def __init__(self, name, value):
-        self.name = name
-        self.value = value
-
-
-class EnumProxy:
-    def __init__(self, tenum: TPayloadMeta):
-        self._tenum = tenum
-        self.name = tenum.__name__
-        self.module_name = tenum.__module__
-
-    def get_fields(self) -> List["EnumFieldProxy"]:
-        fields = self._tenum._NAMES_TO_VALUES  # pylint: disable=protected-access
-        return [EnumFieldProxy(name, value) for name, value in fields.items()]
 
 
 class ServiceProxy:
@@ -127,11 +106,11 @@ class FieldProxy(VarProxy):
     def __init__(self, thrift_spec: tuple, default_value):
         super().__init__(thrift_spec)
         self._is_required = thrift_spec[-1] or default_value is not None
-        self._has_default_value = not thrift_spec[-1]
+        self._has_default_none = not thrift_spec[-1]
         self._default_value = default_value
 
     def reveal_value(self) -> Optional[str]:
-        if self._has_default_value:
+        if self._has_default_none or self._default_value is not None:
             return f"{self._default_value}"
         return None
 
