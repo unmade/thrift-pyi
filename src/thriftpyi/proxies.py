@@ -1,12 +1,13 @@
 from types import ModuleType
 from typing import Dict, List, Optional, Tuple
 
+import thriftpy2
 from thriftpy2.thrift import TPayloadMeta, TType
 
 
 class InterfaceProxy:
-    def __init__(self, module: ModuleType):
-        self.module = module
+    def __init__(self, interface_path: str):
+        self.module = thriftpy2.load(interface_path)
 
     def get_services(self) -> List["ServiceProxy"]:
         return [
