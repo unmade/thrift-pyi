@@ -2,7 +2,7 @@ from thriftpyi.entities import Class, Content, Field, Method, Service
 from thriftpyi.proxies import ClassProxy, FieldProxy, InterfaceProxy, ServiceProxy
 
 
-def make_content(interface: str) -> Content:
+def make_content(interface: str, is_async: bool) -> Content:
     module = InterfaceProxy(interface)
     return Content(
         imports=list(module.get_imports().keys()),
@@ -10,6 +10,7 @@ def make_content(interface: str) -> Content:
         enums=[make_class(klass) for klass in module.get_enums()],
         structs=[make_class(klass) for klass in module.get_structs()],
         services=[make_service(service) for service in module.get_services()],
+        is_async=is_async,
     )
 
 
