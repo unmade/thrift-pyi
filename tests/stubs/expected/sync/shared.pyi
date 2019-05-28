@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import *
 
 class NotFound(Exception):
-    message: Optional[str] = None
+    message: Optional[str] = "Not Found"
 
 @dataclass
 class LimitOffset:

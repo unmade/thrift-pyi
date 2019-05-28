@@ -110,14 +110,15 @@ class FieldProxy(VarProxy):
     def __init__(self, thrift_spec: tuple, default_spec: Dict[str, str]):
         super().__init__(thrift_spec)
         self._default_value = default_spec[self.name]
-        self._is_required = thrift_spec[-1] or self._default_value is not None
-        self._has_default_none = not thrift_spec[-1]
+        self._is_required = thrift_spec[-1]
 
     def reveal_value(self, strict_optional: bool = True) -> Optional[str]:
         if (
-            self._has_default_none
-            or self._default_value is not None
+            self._default_value is not None
+            or not self._is_required
             or not strict_optional
         ):
+            if isinstance(self._default_value, str):
+                return f'"{self._default_value}"'
             return f"{self._default_value}"
         return None

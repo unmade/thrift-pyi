@@ -1,5 +1,5 @@
 exception NotFound {
-    1: optional string message
+    1: optional string message = "Not Found"
 }
 
 
