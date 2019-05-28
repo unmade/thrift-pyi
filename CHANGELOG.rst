@@ -1,6 +1,12 @@
 Changelog
 =========
 
+v0.1.0 (2019-05-28)
+-------------------
+
+* Release stable version
+* Add py38 stage to test matrix in travis
+
 v0.1.0-beta.4 (2019-05-28)
 --------------------------
 
