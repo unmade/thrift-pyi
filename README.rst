@@ -84,7 +84,7 @@ Additionally to generated stubs you might want to create `__init__.py` that will
 To see more detailed example of usage refer to `example app <https://github.com/unmade/thrift-pyi/blob/master/example>`_
 
 --strict-optional
-=================
+-----------------
 
 Python and thrift are very different at argument handling.
 For example in thrift the following will be correct declaration:
