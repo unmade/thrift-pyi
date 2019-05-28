@@ -18,7 +18,7 @@ struct TodoItem {
     4: required dates.DateTime created
     5: required bool is_deleted
     6: optional binary picture
-    7: optional bool is_favorite = false
+    7: required bool is_favorite = false
 }
 
 typedef list<TodoItem> TodoItemList

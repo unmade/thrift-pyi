@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thrift-pyi"
-version = "0.1.0-beta.3"
+version = "0.1.0-beta.4"
 description = "This is simple `.pyi` stubs generator from thrift interfaces"
 readme = "README.rst"
 repository = "https://github.com/unmade/thrift-pyi"
