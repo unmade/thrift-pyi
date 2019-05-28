@@ -6,18 +6,26 @@ from thriftpyi import factories, files, renderers
 from thriftpyi.entities import Content
 
 
-def thriftpyi(interfaces_dir: str, output_dir: str, is_async: bool) -> None:
+def thriftpyi(
+    interfaces_dir: str, output_dir: str, is_async: bool, strict_optional: bool
+) -> None:
     interfaces = files.list_interfaces(interfaces_dir)
-    _generate_stubs(interfaces, output_dir, is_async)
+    _generate_stubs(interfaces, output_dir, is_async, strict_optional)
     _generate_init(interfaces, output_dir)
     path = Path(output_dir).resolve()
     subprocess.check_call([f"autoflake -i -r {path.joinpath('*')}"], shell=True)
     subprocess.check_call(["black", "--quiet", f"{path}"])
 
 
-def _generate_stubs(interfaces: List[str], output_dir: str, is_async: bool) -> None:
+def _generate_stubs(
+    interfaces: List[str], output_dir: str, is_async: bool, strict_optional: bool
+) -> None:
     for interface in interfaces:
-        _generate(factories.make_content(interface, is_async), interface, output_dir)
+        _generate(
+            factories.make_content(interface, is_async, strict_optional),
+            interface,
+            output_dir,
+        )
 
 
 def _generate_init(interfaces: List[str], output_dir: str) -> None:

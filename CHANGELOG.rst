@@ -1,6 +1,11 @@
 Changelog
 =========
 
+v0.1.0-beta.4 (2019-05-28)
+--------------------------
+
+* Add `--strict-optional` parameter - if not specified, all fields will be optional with default to None
+
 v0.1.0-beta.3 (2019-05-25)
 --------------------------
 

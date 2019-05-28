@@ -98,8 +98,10 @@ class VarProxy:
         self._meta = meta
         self._is_required: bool = True
 
-    def reveal_type_for(self, module_name: str) -> str:
-        pytype = get_python_type(self._ttype, self._is_required, self._meta)
+    def reveal_type_for(self, module_name: str, strict_optional: bool = True) -> str:
+        pytype = get_python_type(
+            self._ttype, self._is_required and strict_optional, self._meta
+        )
         start, _, end = pytype.rpartition(f"{module_name}.")
         return start + end
 
@@ -111,7 +113,11 @@ class FieldProxy(VarProxy):
         self._is_required = thrift_spec[-1] or self._default_value is not None
         self._has_default_none = not thrift_spec[-1]
 
-    def reveal_value(self) -> Optional[str]:
-        if self._has_default_none or self._default_value is not None:
+    def reveal_value(self, strict_optional: bool = True) -> Optional[str]:
+        if (
+            self._has_default_none
+            or self._default_value is not None
+            or not strict_optional
+        ):
             return f"{self._default_value}"
         return None
