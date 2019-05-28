@@ -8,7 +8,11 @@ from thriftpyi.cli import main
 
 @pytest.mark.parametrize(
     "expected_dir,args",
-    [("tests/stubs/expected/sync", []), ("tests/stubs/expected/async", ["--async"])],
+    [
+        ("tests/stubs/expected/sync", ["--strict-optional"]),
+        ("tests/stubs/expected/async", ["--async", "--strict-optional"]),
+        ("tests/stubs/expected/optional", []),
+    ],
 )
 def test_main(expected_dir, args):
     input_dir = "example/interfaces"

@@ -11,5 +11,10 @@ from thriftpyi.main import thriftpyi
     is_flag=True,
     help="Whether service methods should be async or not",
 )
-def main(interfaces_dir: str, output: str, is_async: bool):
-    thriftpyi(interfaces_dir, output, is_async)
+@click.option(
+    "--strict-optional",
+    is_flag=True,
+    help="If not specified all fields will be optional with default to None",
+)
+def main(interfaces_dir: str, output: str, is_async: bool, strict_optional: bool):
+    thriftpyi(interfaces_dir, output, is_async, strict_optional)

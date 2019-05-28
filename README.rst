@@ -50,7 +50,7 @@ Installation
     pip install thrift-pyi
 
 Quickstart
-=============
+==========
 
 Sample usage:
 
@@ -83,8 +83,8 @@ Additionally to generated stubs you might want to create `__init__.py` that will
 
 To see more detailed example of usage refer to `example app <https://github.com/unmade/thrift-pyi/blob/master/example>`_
 
-Caveats
-=======
+--strict-optional
+=================
 
 Python and thrift are very different at argument handling.
 For example in thrift the following will be correct declaration:
@@ -98,7 +98,11 @@ For example in thrift the following will be correct declaration:
     }
 
 In python attributes without a default cannot follow attributes with one.
-Nevertheless, library doesn't enforce any checks with that case and will generate `.pyi` as is:
+Therefore by default all fields are optional with default to None. This is compliant
+to `thriftpy2 <https://github.com/Thriftpy/thriftpy2>`_.
+
+However, if you want more strict behaviour you can specify `--strict-optional` option.
+For the case above, the following stubs will be generated:
 
 .. code-block:: python
 
@@ -112,6 +116,10 @@ Nevertheless, library doesn't enforce any checks with that case and will generat
 
 Development
 ===========
+
+To install pre-commit hooks::
+
+    pre-commit install
 
 To run the all tests run::
 
