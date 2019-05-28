@@ -17,6 +17,9 @@ matrix:
     - python: '3.7'
       env:
         - TOXENV=lint,py37,report,codecov
+    - python: '3.8-dev'
+      env:
+        - TOXENV=lint,py38
 
 before_install:
   - python --version
