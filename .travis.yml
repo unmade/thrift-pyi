@@ -7,11 +7,19 @@ env:
     - LD_PRELOAD=/lib/x86_64-linux-gnu/libSegFault.so
     - SEGFAULT_SIGNALS=all
 
+cache:
+  directories:
+  - $HOME/.cache/pip
+  - $HOME/.cache/pre-commit
+
 matrix:
   include:
     - python: '3.7'
       env:
         - TOXENV=lint,py37,report,codecov
+    - python: '3.8-dev'
+      env:
+        - TOXENV=lint,py38
 
 before_install:
   - python --version
