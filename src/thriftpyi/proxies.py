@@ -1,5 +1,5 @@
 from types import ModuleType
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, cast
 
 import thriftpy2
 from thriftpy2.thrift import TPayloadMeta
@@ -77,7 +77,7 @@ class ServiceProxy:
         self.module_name = service.__module__
 
     def get_methods(self) -> List[str]:
-        return [name for name in self.service.thrift_services]
+        return cast(List[str], self.service.thrift_services[:])
 
     def get_args_for(self, method_name) -> List["VarProxy"]:
         method_args = getattr(self.service, f"{method_name}_args").thrift_spec.values()

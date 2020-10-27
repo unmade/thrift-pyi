@@ -16,4 +16,4 @@ if __name__ == "__main__":
     try:
         client.get(id=todo_id + 1)
     except interfaces.shared.NotFound:
-        print(f"NOT FOUND")
+        print("NOT FOUND")
