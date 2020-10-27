@@ -16,8 +16,9 @@ def get_python_type(ttype: int, is_required: bool, meta: List) -> str:
         TType.MAP: _get_map,
         TType.SET: _get_set,
         TType.LIST: _get_list,
-        TType.BINARY: _get_binary,
     }
+    if TType.BINARY != TType.STRING:
+        type_map[TType.BINARY] = _get_binary
     pytype = type_map[ttype](meta)
     if not is_required:
         pytype = f"Optional[{pytype}]"
