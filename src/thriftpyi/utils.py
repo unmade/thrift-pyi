@@ -17,8 +17,6 @@ def get_python_type(ttype: int, is_required: bool, meta: List) -> str:
         TType.SET: _get_set,
         TType.LIST: _get_list,
     }
-    if TType.BINARY != TType.STRING:
-        type_map[TType.BINARY] = _get_binary
     pytype = type_map[ttype](meta)
     if not is_required:
         pytype = f"Optional[{pytype}]"
@@ -42,6 +40,8 @@ def _get_byte(meta: List) -> str:
 
 def _get_binary(meta: List) -> str:
     del meta
+    if TType.BINARY == TType.STRING:
+        return "str"
     return "bytes"
 
 
