@@ -38,6 +38,13 @@ def _get_byte(meta: List) -> str:
     return "int"
 
 
+def _get_binary(meta: List) -> str:
+    del meta
+    if TType.BINARY == TType.STRING:
+        return "str"
+    return "bytes"
+
+
 def _get_i16(meta: List) -> str:
     del meta
     return "int"
