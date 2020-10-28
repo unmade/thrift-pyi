@@ -3,6 +3,7 @@ from typing import Dict, List, Optional, cast
 
 import thriftpy2
 from thriftpy2.thrift import TPayloadMeta
+
 from thriftpyi.utils import get_python_type
 
 

@@ -2,6 +2,7 @@ from dataclasses import asdict
 from importlib import resources
 
 from jinja2 import Template
+
 from thriftpyi.entities import Content
 
 
