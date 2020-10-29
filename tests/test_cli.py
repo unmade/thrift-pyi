@@ -3,6 +3,7 @@ import shutil
 
 import pytest
 from click.testing import CliRunner
+
 from thriftpyi.cli import main
 
 

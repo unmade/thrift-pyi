@@ -1,4 +1,5 @@
 import click
+
 from thriftpyi.main import thriftpyi
 
 
