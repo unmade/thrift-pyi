@@ -4,9 +4,9 @@ Overview
 
 .. start-badges
 
-.. image:: https://travis-ci.org/unmade/thrift-pyi.svg?branch=master
-    :alt: Travis-CI Build Status
-    :target: https://travis-ci.org/unmade/thrift-pyi
+.. image:: https://github.com/unmade/thrift-pyi/workflows/lint%20and%20test/badge.svg?branch=master
+    :alt: Build Status
+    :target: https://github.com/unmade/thrift-pyi/blob/master/.github/workflows/lint-and-test.yml
 
 .. image:: https://codecov.io/github/unmade/thrift-pyi/coverage.svg?branch=master
     :alt: Coverage Status
