@@ -5,7 +5,7 @@ from typing import List
 
 def save(data: str, to: str) -> None:
     Path.mkdir(Path(to).parent, exist_ok=True)
-    with open(to, "w+") as f:
+    with open(to, "w+", encoding="utf-8") as f:
         f.write(data)
 
 
