@@ -4,6 +4,9 @@ from typing import *
 class NotFound(Exception):
     message: Optional[str] = "Not Found"
 
+class EmptyException(Exception):
+    pass
+
 @dataclass
 class LimitOffset:
     limit: Optional[int] = None
