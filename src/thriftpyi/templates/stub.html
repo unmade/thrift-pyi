@@ -9,6 +9,7 @@ from . import {{ import }}
 
 
 {% for error in errors %}
+@dataclass
 class {{ error.name }}(Exception):
 {%- for field in error.fields %}
     {{ field.name }}: {{ field.type }}{% if field.value is not none %} = {{ field.value }}{% endif %}
