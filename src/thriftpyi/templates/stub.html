@@ -10,11 +10,17 @@ from . import {{ import }}
 
 {% for error in errors %}
 class {{ error.name }}(Exception):
-{%- for field in error.fields %}
-    {{ field.name }}: {{ field.type }}{% if field.value is not none %} = {{ field.value }}{% endif %}
-{% else -%}
+{%- if error.fields %}
+    def __init__(
+        self,
+        {%- for field in error.fields %}
+            {{ field.name }}: {{ field.type }}{% if field.value is not none %} = {{ field.value }}{% endif %},
+        {%- endfor %}
+    ):
+        ...
+{%- else %}
     pass
-{%- endfor %}
+{%- endif %}
 {% endfor %}
 
 
