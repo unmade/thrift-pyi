@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import *
 
 class NotFound(Exception):
-    message: Optional[str] = "Not Found"
+    def __init__(self, message: Optional[str] = "Not Found",): ...
 
 class EmptyException(Exception):
     pass
