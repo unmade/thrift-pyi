@@ -12,7 +12,7 @@ if __name__ == "__main__":
 
     todo_id = client.create(text="item", type=interfaces.todo.TodoType.NOTE)
     print(f"CREATE = {todo_id}")
-    print(f"GET    = {client.get(id=todo_id)}")
+    print(f"GET    = {client.get(todo_id)}")
     try:
         client.get(id=todo_id + 1)
     except interfaces.shared.NotFound:

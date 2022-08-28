@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from typing import *
+
 @dataclass
 class DateTime:
     year: Optional[int] = None
@@ -11,5 +12,4 @@ class DateTime:
     microsecond: Optional[int] = None
 
 @dataclass
-class Date:
-    pass
+class Date: ...

@@ -6,6 +6,8 @@ from thriftpy2.thrift import TPayloadMeta
 
 from thriftpyi.utils import get_python_type
 
+NoDefault = object()
+
 
 class InterfaceProxy:
     def __init__(self, interface_path: str):
@@ -119,7 +121,5 @@ class FieldProxy(VarProxy):
             or not self._is_required
             or not strict_optional
         ):
-            if isinstance(self._default_value, str):
-                return f'"{self._default_value}"'
-            return f"{self._default_value}"
-        return None
+            return self._default_value
+        return NoDefault

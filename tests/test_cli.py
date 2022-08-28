@@ -2,7 +2,6 @@ import filecmp
 import shutil
 
 import pytest
-from click.testing import CliRunner
 
 from thriftpyi.cli import main
 
@@ -15,13 +14,13 @@ from thriftpyi.cli import main
         ("tests/stubs/expected/optional", []),
     ],
 )
-def test_main(expected_dir, args):
+def test_main(capsys, expected_dir, args):
+    del capsys
+
     input_dir = "example/interfaces"
     output_dir = "tests/stubs/actual"
 
-    runner = CliRunner()
-    result = runner.invoke(main, [input_dir, "--output", output_dir] + args)
-    assert result.exit_code == 0
+    main([input_dir, "--output", output_dir, *args])
 
     pyi_files = ["__init__.pyi", "dates.pyi", "shared.pyi", "todo.pyi", "todo_v2.pyi"]
     match, mismatch, errors = filecmp.cmpfiles(output_dir, expected_dir, pyi_files)
