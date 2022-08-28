@@ -2,10 +2,9 @@ from dataclasses import dataclass
 from typing import *
 
 class NotFound(Exception):
-    def __init__(self, message: Optional[str] = "Not Found",): ...
+    def __init__(self, message: Optional[str] = "Not Found"): ...
 
-class EmptyException(Exception):
-    pass
+class EmptyException(Exception): ...
 
 @dataclass
 class LimitOffset:
@@ -13,4 +12,4 @@ class LimitOffset:
     offset: Optional[int] = None
 
 class Service:
-    async def ping(self,) -> str: ...
+    async def ping(self) -> str: ...

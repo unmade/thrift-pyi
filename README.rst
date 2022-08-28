@@ -97,9 +97,9 @@ For example in thrift the following will be correct declaration:
         2: required string text
     }
 
-In python attributes without a default cannot follow attributes with one.
-Therefore by default all fields are optional with default to None. This is compliant
-to `thriftpy2 <https://github.com/Thriftpy/thriftpy2>`_.
+In python, fields without default values cannot appear after fields with default
+values. Therefore by default all fields are optional with default to None.
+This is compliant to `thriftpy2 <https://github.com/Thriftpy/thriftpy2>`_.
 
 However, if you want more strict behaviour you can specify `--strict-optional` option.
 For the case above, the following stubs will be generated:

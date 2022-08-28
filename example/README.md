@@ -7,7 +7,7 @@ in order to have correct autocomplete and type checking for dynamically loaded t
 
 Stubs were created with command:
 
-    thriftpyi example/interfaces --output example/app/interfaces
+    thriftpyi example/interfaces --output example/app/interfaces --strict-optional
 
 Note, that [\_\_init__.py](app/interfaces/__init__.py) was created by hand and not by the script.
 This file is responsible for the actual access to thrift interfaces.
