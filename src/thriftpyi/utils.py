@@ -3,7 +3,7 @@ from typing import List, Tuple
 from thriftpy2.thrift import TType
 
 
-def get_python_type(ttype: int, is_required: bool, meta: List) -> str:
+def get_python_type(ttype: int, meta: List) -> str:
     type_map = {
         TType.BOOL: _get_bool,
         TType.DOUBLE: _get_double,
@@ -18,8 +18,6 @@ def get_python_type(ttype: int, is_required: bool, meta: List) -> str:
         TType.LIST: _get_list,
     }
     pytype = type_map[ttype](meta)
-    if not is_required:
-        pytype = f"Optional[{pytype}]"
     return pytype
 
 
@@ -71,21 +69,21 @@ def _get_struct(meta: List) -> str:
 
 def _get_list(meta: List) -> str:
     subttype, submeta = _unpack_meta(meta)
-    return f"List[{get_python_type(subttype, True, submeta)}]"
+    return f"List[{get_python_type(subttype, submeta)}]"
 
 
 def _get_map(meta: List) -> str:
     key, value = meta[0]
     key_ttype, key_meta = _unpack_meta([key])
     value_ttype, value_meta = _unpack_meta([value])
-    key_pytype = get_python_type(key_ttype, True, key_meta)
-    value_pytype = get_python_type(value_ttype, True, value_meta)
+    key_pytype = get_python_type(key_ttype, key_meta)
+    value_pytype = get_python_type(value_ttype, value_meta)
     return f"Dict[{key_pytype}, {value_pytype}]"
 
 
 def _get_set(meta: List) -> str:
     subttype, submeta = _unpack_meta(meta)
-    return f"Set[{get_python_type(subttype, True, submeta)}]"
+    return f"Set[{get_python_type(subttype, submeta)}]"
 
 
 def _unpack_meta(meta: List) -> Tuple[int, List]:

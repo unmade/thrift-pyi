@@ -1,125 +1,154 @@
-from types import ModuleType
-from typing import Dict, List, Optional, cast
+from __future__ import annotations
 
-import thriftpy2
-from thriftpy2.thrift import TPayloadMeta
+from typing import List, Tuple, cast
 
+from thriftpyi.entities import Field, FieldValue, Method, ModuleItem
 from thriftpyi.utils import get_python_type
 
-NoDefault = object()
 
+class TModuleProxy:
+    __slots__ = ["tmodule"]
 
-class InterfaceProxy:
-    def __init__(self, interface_path: str):
-        self.module = thriftpy2.load(interface_path)
+    def __init__(self, tmodule) -> None:
+        self.tmodule = tmodule
 
-    def get_services(self) -> List["ServiceProxy"]:
+    def get_enums(self) -> List[ModuleItem]:
         return [
-            ServiceProxy(member)
-            for member in self.module.__dict__.values()
-            if hasattr(member, "thrift_services")
+            self._make_enum(tenum) for tenum in self.tmodule.__thrift_meta__["enums"]
         ]
 
-    def get_imports(self) -> Dict[str, ModuleType]:
-        return {
-            name: item
-            for name, item in self.module.__dict__.items()
-            if isinstance(item, ModuleType)
-        }
-
-    def get_errors(self) -> List["ClassProxy"]:
+    def get_exceptions(self) -> List[ModuleItem]:
         return [
-            ClassProxy(member)
-            for name, member in self.module.__dict__.items()
-            if isinstance(member, TPayloadMeta) and hasattr(member, "args")
+            self._make_exception(texc)
+            for texc in self.tmodule.__thrift_meta__["exceptions"]
         ]
 
-    def get_enums(self) -> List["EnumProxy"]:
+    def get_imports(self) -> List[str]:
+        return [item.__name__ for item in self.tmodule.__thrift_meta__["includes"]]
+
+    def get_services(self) -> List[ModuleItem]:
         return [
-            EnumProxy(member)
-            for name, member in self.module.__dict__.items()
-            if hasattr(member, "_NAMES_TO_VALUES")
+            self._make_service(tservice)
+            for tservice in self.tmodule.__thrift_meta__["services"]
         ]
 
-    def get_structs(self) -> List["ClassProxy"]:
+    def get_structs(self) -> List[ModuleItem]:
         return [
-            ClassProxy(member)
-            for name, member in self.module.__dict__.items()
-            if isinstance(member, TPayloadMeta) and not hasattr(member, "args")
+            self._make_struct(tstruct)
+            for tstruct in self.tmodule.__thrift_meta__["structs"]
         ]
 
+    def has_structs(self) -> bool:
+        return len(self.tmodule.__thrift_meta__["structs"]) > 0
 
-class ClassProxy:
-    def __init__(self, tclass: TPayloadMeta):
-        self._tclass = tclass
-        self.name = tclass.__name__
-        self.module_name = tclass.__module__
+    def has_enums(self) -> bool:
+        return len(self.tmodule.__thrift_meta__["enums"]) > 0
 
-    def get_fields(self) -> List["FieldProxy"]:
-        default_spec = dict(self._tclass.default_spec)
-        return [
-            FieldProxy(thrift_spec, default_spec=default_spec)
-            for thrift_spec in self._tclass.thrift_spec.values()
-        ]
-
-
-class EnumProxy(ClassProxy):
-    def get_fields(self) -> List["FieldProxy"]:
-        fields = self._tclass._NAMES_TO_VALUES  # pylint: disable=protected-access
-        ttype = self._tclass._ttype  # pylint: disable=protected-access
-        return [
-            FieldProxy((ttype, name, True), default_spec={name: value})
-            for name, value in fields.items()
-        ]
-
-
-class ServiceProxy:
-    def __init__(self, service):
-        self.service = service
-        self.name = service.__name__
-        self.module_name = service.__module__
-
-    def get_methods(self) -> List[str]:
-        return cast(List[str], self.service.thrift_services[:])
-
-    def get_args_for(self, method_name) -> List["VarProxy"]:
-        method_args = getattr(self.service, f"{method_name}_args").thrift_spec.values()
-        return [VarProxy(arg) for arg in method_args]
-
-    def get_return_type_for(self, method_name) -> str:
-        returns = getattr(self.service, f"{method_name}_result").thrift_spec.get(0)
-        if returns is None:
-            return "None"
-        return VarProxy(returns).reveal_type_for(self.module_name)
-
-
-class VarProxy:
-    def __init__(self, thrift_spec: tuple):
-        ttype, name, *meta, _ = thrift_spec
-        self._ttype: int = ttype
-        self.name: str = name
-        self._meta = meta
-        self._is_required: bool = True
-
-    def reveal_type_for(self, module_name: str, strict_optional: bool = True) -> str:
-        pytype = get_python_type(
-            self._ttype, self._is_required and strict_optional, self._meta
+    @staticmethod
+    def _make_enum(tenum) -> ModuleItem:
+        fields = tenum._NAMES_TO_VALUES  # pylint: disable=protected-access
+        ttype = tenum._ttype  # pylint: disable=protected-access
+        tspec = {idx: (ttype, name, True) for idx, name in enumerate(fields)}
+        spec = TSpecProxy(
+            module_name=tenum.__module__,
+            thrift_spec=tspec,
+            default_spec=fields,
         )
-        start, _, end = pytype.rpartition(f"{module_name}.")
+        return ModuleItem(name=tenum.__name__, fields=spec.get_fields())
+
+    @staticmethod
+    def _make_exception(texc) -> ModuleItem:
+        spec = TSpecProxy(
+            module_name=texc.__module__,
+            thrift_spec=texc.thrift_spec,
+            default_spec=dict(texc.default_spec),
+        )
+
+        fields = spec.get_fields()
+        methods = []
+        if fields:
+            methods.append(Method(name="__init__", args=fields))
+
+        return ModuleItem(name=texc.__name__, methods=methods)
+
+    @classmethod
+    def _make_service(cls, tservice) -> ModuleItem:
+        return ModuleItem(
+            name=tservice.__name__,
+            methods=[
+                Method(
+                    name=method_name,
+                    args=TSpecProxy(
+                        module_name=tservice.__module__,
+                        thrift_spec=getattr(
+                            tservice, f"{method_name}_args"
+                        ).thrift_spec,
+                        default_spec=dict(
+                            getattr(tservice, f"{method_name}_args").default_spec
+                        ),
+                    ).get_fields(),
+                    returns=TSpecProxy(
+                        module_name=tservice.__module__,
+                        thrift_spec=getattr(
+                            tservice, f"{method_name}_result"
+                        ).thrift_spec,
+                        default_spec=dict(
+                            getattr(tservice, f"{method_name}_args").default_spec
+                        ),
+                    ).get_fields(),
+                )
+                for method_name in tservice.thrift_services
+            ],
+        )
+
+    @staticmethod
+    def _make_struct(tclass) -> ModuleItem:
+        spec = TSpecProxy(
+            module_name=tclass.__module__,
+            thrift_spec=tclass.thrift_spec,
+            default_spec=dict(tclass.default_spec),
+        )
+        return ModuleItem(
+            name=tclass.__name__,
+            fields=spec.get_fields(),
+        )
+
+
+class TSpecItemProxy:
+    __slots__ = ("ttype", "name", "meta", "required")
+
+    def __init__(self, item: Tuple):
+        ttype, name, *meta, required = item
+        self.ttype = ttype
+        self.name = name
+        self.meta = meta
+        self.required = required
+
+
+class TSpecProxy:
+    __slots__ = ("module_name", "thrift_spec", "default_spec")
+
+    def __init__(self, module_name: str, thrift_spec, default_spec):
+        self.module_name = module_name
+        self.thrift_spec = [TSpecItemProxy(thrift_spec[k]) for k in sorted(thrift_spec)]
+        self.default_spec = default_spec
+
+    def get_fields(self) -> List[Field]:
+        return [
+            Field(
+                name=item.name,
+                type=self._get_python_type(item),
+                value=self._get_default_value(item),
+                required=item.required,
+            )
+            for item in self.thrift_spec
+        ]
+
+    def _get_python_type(self, item: TSpecItemProxy) -> str:
+        pytype = get_python_type(item.ttype, meta=item.meta)
+        start, _, end = pytype.rpartition(f"{self.module_name}.")
         return start + end
 
-
-class FieldProxy(VarProxy):
-    def __init__(self, thrift_spec: tuple, default_spec: Dict[str, str]):
-        super().__init__(thrift_spec)
-        self._default_value = default_spec[self.name]
-        self._is_required = thrift_spec[-1]
-
-    def reveal_value(self, strict_optional: bool = True) -> Optional[str]:
-        if (
-            self._default_value is not None
-            or not self._is_required
-            or not strict_optional
-        ):
-            return self._default_value
-        return NoDefault
+    def _get_default_value(self, item: TSpecItemProxy) -> FieldValue:
+        default_value = self.default_spec.get(item.name)
+        return cast(FieldValue, default_value)
