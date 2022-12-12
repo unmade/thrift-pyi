@@ -16,7 +16,7 @@ jobs:
     strategy:
       max-parallel: 4
       matrix:
-        python-version: ['3.7', '3.8', '3.9', '3.10']
+        python-version: ['3.7', '3.8', '3.9', '3.10', '3.11']
 
     steps:
     - uses: actions/checkout@v3
@@ -52,7 +52,7 @@ jobs:
         tox -e coverage -- --fail-under=99
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@master
+      uses: codecov/codecov-action@v3
       with:
           token: ${{ secrets.CODECOV_TOKEN }}
           file: ./test-reports/coverage.xml
