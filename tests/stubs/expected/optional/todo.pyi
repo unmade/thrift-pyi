@@ -16,7 +16,7 @@ class TodoItem:
     type: Optional[int] = None
     created: Optional[dates.DateTime] = None
     is_deleted: Optional[bool] = None
-    picture: Optional[str] = None
+    picture: Optional[bytes] = None
     is_favorite: Optional[bool] = False
 
 class Todo:
