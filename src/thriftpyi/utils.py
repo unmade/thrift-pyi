@@ -4,21 +4,7 @@ from thriftpy2.thrift import TType
 
 
 def get_python_type(ttype: int, meta: List) -> str:
-    type_map = {
-        TType.BOOL: _get_bool,
-        TType.DOUBLE: _get_double,
-        TType.BYTE: _get_byte,
-        TType.I16: _get_i16,
-        TType.I32: _get_i32,
-        TType.I64: _get_i64,
-        TType.STRING: _get_str,
-        TType.STRUCT: _get_struct,
-        TType.MAP: _get_map,
-        TType.SET: _get_set,
-        TType.LIST: _get_list,
-    }
-    pytype = type_map[ttype](meta)
-    return pytype
+    return TTYPE_MAP[ttype](meta)
 
 
 def _get_bool(meta: List) -> str:
@@ -38,8 +24,6 @@ def _get_byte(meta: List) -> str:
 
 def _get_binary(meta: List) -> str:
     del meta
-    if TType.BINARY == TType.STRING:
-        return "str"
     return "bytes"
 
 
@@ -92,3 +76,27 @@ def _unpack_meta(meta: List) -> Tuple[int, List]:
     except TypeError:
         subttype, submeta = meta[0], None
     return subttype, [submeta]
+
+
+def _register_binary(mapping):
+    ttype_binary = getattr(TType, "BINARY", TType.STRING)
+    if ttype_binary != TType.STRING:
+        mapping[ttype_binary] = _get_binary
+
+
+TTYPE_MAP = {
+    TType.BOOL: _get_bool,
+    TType.DOUBLE: _get_double,
+    TType.BYTE: _get_byte,
+    TType.I16: _get_i16,
+    TType.I32: _get_i32,
+    TType.I64: _get_i64,
+    TType.STRING: _get_str,
+    TType.STRUCT: _get_struct,
+    TType.MAP: _get_map,
+    TType.SET: _get_set,
+    TType.LIST: _get_list,
+}
+
+
+_register_binary(TTYPE_MAP)
