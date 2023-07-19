@@ -69,7 +69,7 @@ class TModuleProxy:
         if fields:
             methods.append(Method(name="__init__", args=fields))
 
-        return ModuleItem(name=texc.__name__, methods=methods)
+        return ModuleItem(name=texc.__name__, methods=methods, fields=fields)
 
     @classmethod
     def _make_service(cls, tservice) -> ModuleItem:
