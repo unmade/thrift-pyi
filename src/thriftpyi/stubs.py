@@ -13,6 +13,7 @@ def build(
     return ast.Module(
         body=[
             *_make_imports(proxy),
+            *_make_consts(proxy),
             *_make_exceptions(proxy, strict=strict_fields),
             *_make_enums(proxy),
             *_make_structs(proxy, strict=strict_fields),
@@ -58,6 +59,10 @@ def _make_relative_import(names: Iterable[str]) -> ast.ImportFrom:
         names=[ast.alias(name=name, asname=None) for name in sorted(names)],
         level=1,
     )
+
+
+def _make_consts(interface: TModuleProxy) -> List[ast.AnnAssign]:
+    return [item.as_ast() for item in interface.get_consts()]
 
 
 def _make_exceptions(interface: TModuleProxy, strict: bool) -> List[ast.ClassDef]:

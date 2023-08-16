@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Tuple, cast
 
 from thriftpyi.entities import Field, FieldValue, Method, ModuleItem
-from thriftpyi.utils import get_python_type
+from thriftpyi.utils import get_python_type, guess_type
 
 
 class TModuleProxy:
@@ -11,6 +11,14 @@ class TModuleProxy:
 
     def __init__(self, tmodule) -> None:
         self.tmodule = tmodule
+
+    def get_consts(self) -> List[Field]:
+        tconsts = (
+            (name, value)
+            for name, value in vars(self.tmodule).items()
+            if value in self.tmodule.__thrift_meta__["consts"]
+        )
+        return [self._make_const(tconst) for tconst in tconsts]
 
     def get_enums(self) -> List[ModuleItem]:
         return [
@@ -45,6 +53,16 @@ class TModuleProxy:
         return len(self.tmodule.__thrift_meta__["enums"]) > 0
 
     @staticmethod
+    def _make_const(tconst) -> Field:
+        name, value = tconst
+        return Field(
+            name=name,
+            type=guess_type(value),
+            value=value,
+            required=True,
+        )
+
+    @staticmethod
     def _make_enum(tenum) -> ModuleItem:
         fields = tenum._NAMES_TO_VALUES  # pylint: disable=protected-access
         ttype = tenum._ttype  # pylint: disable=protected-access
@@ -71,8 +89,8 @@ class TModuleProxy:
 
         return ModuleItem(name=texc.__name__, methods=methods, fields=fields)
 
-    @classmethod
-    def _make_service(cls, tservice) -> ModuleItem:
+    @staticmethod
+    def _make_service(tservice) -> ModuleItem:
         return ModuleItem(
             name=tservice.__name__,
             methods=[
