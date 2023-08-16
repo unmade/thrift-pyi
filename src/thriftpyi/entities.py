@@ -5,7 +5,6 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, List, Sequence, Type, Union
 
 if TYPE_CHECKING:
-    AnyAssign = Union[ast.Assign, ast.AnnAssign]
     AnyFunctionDef = Union[ast.AsyncFunctionDef, ast.FunctionDef]
     AnyFunctionDefType = Union[Type[ast.AsyncFunctionDef], Type[ast.FunctionDef]]
 
@@ -50,7 +49,7 @@ class ModuleItem:
         *,
         bases: Sequence[str] = None,
         decorators: Sequence[str] = None,
-    ):
+    ) -> ast.ClassDef:
         bases = bases or []
         decorators = decorators or []
 
@@ -158,7 +157,7 @@ class Field:
             required=required,
         )
 
-    def as_ast(self) -> AnyAssign:
+    def as_ast(self) -> ast.AnnAssign:
         if not self.required:
             annotation = ast.Name(id=f"Optional[{self.type}]", ctx=ast.Load())
         else:

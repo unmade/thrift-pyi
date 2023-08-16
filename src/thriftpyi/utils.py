@@ -1,6 +1,22 @@
+from collections.abc import Collection, Mapping
 from typing import List, Tuple
 
 from thriftpy2.thrift import TType
+
+
+def guess_type(value) -> str:
+    if isinstance(value, (bool, int, float, str, bytes)):
+        return type(value).__name__
+    if isinstance(value, Mapping):
+        type_ = type(value).__name__.capitalize()
+        key_type = guess_type(list(value.keys())[0])
+        value_type = guess_type(list(value.values())[0])
+        return f"{type_}[{key_type}, {value_type}]"
+    if isinstance(value, Collection):
+        type_ = type(value).__name__.capitalize()
+        item_type = guess_type(next(iter(value)))
+        return f"{type_}[{item_type}]"
+    return "Any"
 
 
 def get_python_type(ttype: int, meta: List) -> str:
