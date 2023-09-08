@@ -3,6 +3,8 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 
+from autoflake import fix_code
+from black import format_str, FileMode
 import thriftpy2
 
 from thriftpyi import files, stubs
@@ -32,13 +34,13 @@ def thriftpyi(  # pylint: disable=too-many-locals
             strict_fields=strict_fields,
             strict_methods=strict_methods,
         )
-        files.save(ast_unparse(stub), to=output_dir / path.with_suffix(".pyi").name)
+        files.save(lint(ast_unparse(stub)), to=output_dir / path.with_suffix(".pyi").name)
 
     lint(output_dir)
 
 
-def lint(output_dir: Path) -> None:
-    subprocess.check_call([f"autoflake -i -r {output_dir.joinpath('*')}"], shell=True)
-    subprocess.check_call(
-        ["black", "--pyi", "--quiet", *list(output_dir.glob("*.pyi"))]
-    )
+def lint(code_str: str) -> str:
+    formatted_code_str = fix_code(code_str)
+    formatted_code_str = format_str(formatted_code_str, mode=FileMode())
+
+    return formatted_code_str
