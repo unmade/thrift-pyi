@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 
-from autoflake import fix_code
-from black import format_str, FileMode
 import thriftpy2
+from autoflake import fix_code
+from black import FileMode, format_str
 
 from thriftpyi import files, stubs
 from thriftpyi.compat import ast_unparse
@@ -23,7 +22,7 @@ def thriftpyi(  # pylint: disable=too-many-locals
     interfaces = files.list_interfaces(interfaces_dir)
 
     stub = stubs.build_init(path.stem for path in interfaces)
-    files.save(ast_unparse(stub), to=output_dir / "__init__.pyi")
+    files.save(lint(ast_unparse(stub)), to=output_dir / "__init__.pyi")
 
     for path in interfaces:
         tmodule = thriftpy2.load(str(path))
@@ -34,9 +33,9 @@ def thriftpyi(  # pylint: disable=too-many-locals
             strict_fields=strict_fields,
             strict_methods=strict_methods,
         )
-        files.save(lint(ast_unparse(stub)), to=output_dir / path.with_suffix(".pyi").name)
-
-    lint(output_dir)
+        files.save(
+            lint(ast_unparse(stub)), to=output_dir / path.with_suffix(".pyi").name
+        )
 
 
 def lint(code_str: str) -> str:
