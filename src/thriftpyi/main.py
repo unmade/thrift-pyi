@@ -42,4 +42,4 @@ def lint(code_str: str) -> str:
     formatted_code_str = fix_code(code_str)
     formatted_code_str = format_str(formatted_code_str, mode=FileMode())
 
-    return formatted_code_str
+    return str(formatted_code_str)
