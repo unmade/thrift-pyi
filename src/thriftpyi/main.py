@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import subprocess
+import sys
 from pathlib import Path
 
 import thriftpy2
@@ -38,7 +39,17 @@ def thriftpyi(  # pylint: disable=too-many-locals
 
 
 def lint(output_dir: Path) -> None:
-    subprocess.check_call([f"autoflake -i -r {output_dir.joinpath('*')}"], shell=True)
     subprocess.check_call(
-        ["black", "--pyi", "--quiet", *list(output_dir.glob("*.pyi"))]
+        [f"{sys.executable} -m autoflake -i -r {output_dir.joinpath('*')}"],
+        shell=True,
+    )
+    subprocess.check_call(
+        [
+            f"{sys.executable}",
+            "-m",
+            "black",
+            "--pyi",
+            "--quiet",
+            *list(output_dir.glob("*.pyi")),
+        ]
     )
