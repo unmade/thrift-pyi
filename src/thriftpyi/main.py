@@ -39,13 +39,20 @@ def thriftpyi(  # pylint: disable=too-many-locals
 
 
 def lint(output_dir: Path) -> None:
+    python_executable = sys.executable
+    if not python_executable:
+        raise RuntimeError(
+            "Python executable not found. Make sure that Python is "
+            "installed and the path is set correctly."
+        )
+
     subprocess.check_call(
-        [f"{sys.executable} -m autoflake -i -r {output_dir.joinpath('*')}"],
+        [f"{python_executable} -m autoflake -i -r {output_dir.joinpath('*')}"],
         shell=True,
     )
     subprocess.check_call(
         [
-            f"{sys.executable}",
+            f"{python_executable}",
             "-m",
             "black",
             "--pyi",
