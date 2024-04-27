@@ -52,12 +52,18 @@ class TModuleProxy:
     def has_enums(self) -> bool:
         return len(self.tmodule.__thrift_meta__["enums"]) > 0
 
-    @staticmethod
-    def _make_const(tconst) -> Field:
+    def _make_const(self, tconst) -> Field:
         name, value = tconst
         return Field(
             name=name,
-            type=guess_type(value),
+            type=guess_type(
+                value,
+                known_modules={
+                    module.__name__
+                    for module in self.tmodule.__thrift_meta__["includes"]
+                },
+                known_structs=self.tmodule.__thrift_meta__["structs"],
+            ),
             value=value,
             required=True,
         )

@@ -13,10 +13,10 @@ def build(
     return ast.Module(
         body=[
             *_make_imports(proxy),
-            *_make_consts(proxy),
             *_make_exceptions(proxy, strict=strict_fields),
             *_make_enums(proxy),
             *_make_structs(proxy, strict=strict_fields),
+            *_make_consts(proxy),
             *_make_service(proxy, is_async, strict=strict_methods),
         ],
         type_ignores=[],
