@@ -45,7 +45,7 @@ class TestGuessType:
         ],
     )
     def test(self, guess_type, value, expected: str):
-        assert guess_type(value) == expected
+        assert guess_type(value, known_modules=[], known_structs=[]) == expected
 
 
 class TestRegisterBinary:

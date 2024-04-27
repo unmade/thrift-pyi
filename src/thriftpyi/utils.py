@@ -1,21 +1,43 @@
-from collections.abc import Collection, Mapping
-from typing import List, Tuple
+from collections.abc import Mapping
+from typing import Any, Collection, List, Tuple, Type
 
 from thriftpy2.thrift import TType
 
 
-def guess_type(value) -> str:
+def guess_type(  # pylint: disable=too-many-branches
+    value, *, known_modules: Collection[str], known_structs: Collection[Type[Any]]
+) -> str:
     if isinstance(value, (bool, int, float, str, bytes)):
         return type(value).__name__
+
     if isinstance(value, Mapping):
         type_ = type(value).__name__.capitalize()
-        key_type = guess_type(list(value.keys())[0])
-        value_type = guess_type(list(value.values())[0])
+        key_type = guess_type(
+            next(iter(value.keys())),
+            known_modules=known_modules,
+            known_structs=known_structs,
+        )
+        value_type = guess_type(
+            next(iter(value.values())),
+            known_modules=known_modules,
+            known_structs=known_structs,
+        )
         return f"{type_}[{key_type}, {value_type}]"
+
     if isinstance(value, Collection):
         type_ = type(value).__name__.capitalize()
-        item_type = guess_type(next(iter(value)))
+        item_type = guess_type(
+            next(iter(value)), known_modules=known_modules, known_structs=known_structs
+        )
         return f"{type_}[{item_type}]"
+
+    if hasattr(value, "__class__"):
+        module_name: str = value.__class__.__module__
+        class_name: str = value.__class__.__name__
+        if module_name in known_modules:
+            return f"{module_name}.{class_name}"
+        if type(value) in known_structs:
+            return class_name
     return "Any"
 
 
