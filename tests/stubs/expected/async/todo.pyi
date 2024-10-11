@@ -5,9 +5,9 @@ from . import dates
 from . import shared
 
 class TodoType(IntEnum):
-    PLAIN: int = 1
-    NOTE: int = 2
-    CHECKBOXES: int = 3
+    PLAIN = 1
+    NOTE = 2
+    CHECKBOXES = 3
 
 @dataclass
 class TodoItem:
