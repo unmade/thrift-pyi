@@ -78,7 +78,7 @@ class TModuleProxy:
             thrift_spec=tspec,
             default_spec=fields,
         )
-        return ModuleItem(name=tenum.__name__, fields=spec.get_fields())
+        return ModuleItem(name=tenum.__name__, fields=spec.get_fields(ignore_type=True))
 
     @staticmethod
     def _make_exception(texc) -> ModuleItem:
@@ -157,11 +157,11 @@ class TSpecProxy:
         self.thrift_spec = [TSpecItemProxy(thrift_spec[k]) for k in sorted(thrift_spec)]
         self.default_spec = default_spec
 
-    def get_fields(self) -> List[Field]:
+    def get_fields(self, *, ignore_type: bool = False) -> List[Field]:
         return [
             Field(
                 name=item.name,
-                type=self._get_python_type(item),
+                type=self._get_python_type(item) if not ignore_type else None,
                 value=self._get_default_value(item),
                 required=item.required,
             )

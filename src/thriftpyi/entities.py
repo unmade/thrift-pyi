@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Sequence, Type, Union
+from typing import TYPE_CHECKING, List, Sequence, Type, Union, Optional
 
 if TYPE_CHECKING:
     AnyFunctionDef = Union[ast.AsyncFunctionDef, ast.FunctionDef]
@@ -139,7 +139,7 @@ class Method:
 @dataclass
 class Field:
     name: str
-    type: str
+    type: Optional[str]
     value: FieldValue
     required: bool
 
@@ -157,7 +157,13 @@ class Field:
             required=required,
         )
 
-    def as_ast(self) -> ast.AnnAssign:
+    def as_ast(self) -> Union[ast.AnnAssign, ast.Assign]:
+        if self.type is None:
+            return ast.Assign(
+                targets=[ast.Name(id=self.name, ctx=ast.Store())],
+                value=ast.Constant(value=self.value),
+            )
+
         if not self.required:
             annotation = ast.Name(id=f"Optional[{self.type}]", ctx=ast.Load())
         else:
