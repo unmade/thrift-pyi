@@ -168,10 +168,22 @@ class TSpecProxy:
             for item in self.thrift_spec
         ]
 
-    def _get_python_type(self, item: TSpecItemProxy) -> str:
-        pytype = get_python_type(item.ttype, meta=item.meta)
+    def _remove_self_module(self, pytype: str) -> str:
+        left_type, sep, right_type = pytype.partition(",")
+        # Due to complex type, such as Dict[some_module.TypeA, some_module.TypeB]
+        # recursively deal with the first and second parts
+        if right_type != "":
+            return (
+                self._remove_self_module(left_type)
+                + sep
+                + self._remove_self_module(right_type)
+            )
         start, _, end = pytype.rpartition(f"{self.module_name}.")
         return start + end
+
+    def _get_python_type(self, item: TSpecItemProxy) -> str:
+        pytype = get_python_type(item.ttype, meta=item.meta)
+        return self._remove_self_module(pytype)
 
     def _get_default_value(self, item: TSpecItemProxy) -> FieldValue:
         default_value = self.default_spec.get(item.name)

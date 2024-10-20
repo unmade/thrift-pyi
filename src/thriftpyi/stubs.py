@@ -61,7 +61,7 @@ def _make_relative_import(names: Iterable[str]) -> ast.ImportFrom:
     )
 
 
-def _make_consts(interface: TModuleProxy) -> List[ast.AnnAssign]:
+def _make_consts(interface: TModuleProxy) -> List[ast.stmt]:
     return [item.as_ast() for item in interface.get_consts()]
 
 
