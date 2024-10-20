@@ -10,11 +10,10 @@ packages = [
     { include = "thriftpyi", from = "src" },
 ]
 classifiers = [
-    "Programming Language :: Python :: 3.7",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Software Development :: Code Generators",
@@ -24,8 +23,7 @@ classifiers = [
 thriftpyi = "thriftpyi.cli:main"
 
 [tool.poetry.dependencies]
-python = "^3.7"
-astunparse = {version = "^1.6.3", python = "< 3.9.0" }
+python = "^3.9"
 autoflake = "*"
 black = "*"
 thriftpy2 = "^0.4.2"
@@ -33,13 +31,10 @@ thriftpy2 = "^0.4.2"
 [tool.poetry.dev-dependencies]
 tox = "^3.24"
 pre-commit = "^2.20"
-mypy = "^0.971"
-pylint = [
-    {version = ">=2.13.9,<2.14.0", python = ">= 3.7.0, < 3.7.2"},
-    {version = "^2.15", python = ">= 3.7.2, < 4.0.0"},
-]
-pytest = "^7.1.2"
-pytest-cov = "^3.0.0"
+mypy = "^1.12"
+pylint = "^3.3"
+pytest = "^8.3"
+pytest-cov = "^5.0"
 
 
 [build-system]

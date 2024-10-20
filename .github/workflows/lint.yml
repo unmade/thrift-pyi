@@ -15,22 +15,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
       id: set-python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
-        python-version: "3.7"  # don't forget to update cache key below
+        python-version: "3.9"  # don't forget to update cache key below
 
     - name: Cache pip dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pip
-        key: ${{ runner.os }}-3.7-pip-${{ hashFiles('**/poetry.lock') }}
+        key: ${{ runner.os }}-3.9-pip-${{ hashFiles('**/poetry.lock') }}
 
     - name: Cache pre-commit dependencies
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: ~/.cache/pre-commit
         key: ${{ runner.os }}-pre-commit-${{ hashFiles('**/.pre-commit-config.yaml') }}-${{ hashFiles('**/tox.ini') }}
