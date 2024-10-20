@@ -71,7 +71,8 @@ def _get_i16(meta: List) -> str:
 
 
 def _get_i32(meta: List) -> str:
-    del meta
+    if meta and meta[0] is not None:
+        return f"{meta[0].__module__}.{meta[0].__name__}"
     return "int"
 
 

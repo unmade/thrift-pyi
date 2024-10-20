@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Sequence, Type, Union, Optional
+from typing import TYPE_CHECKING, List, Optional, Sequence, Type, Union
 
 if TYPE_CHECKING:
     AnyFunctionDef = Union[ast.AsyncFunctionDef, ast.FunctionDef]
@@ -161,7 +161,8 @@ class Field:
         if self.type is None:
             return ast.Assign(
                 targets=[ast.Name(id=self.name, ctx=ast.Store())],
-                value=ast.Constant(value=self.value),
+                value=ast.Constant(value=self.value, kind=None),
+                lineno=0,
             )
 
         if not self.required:
