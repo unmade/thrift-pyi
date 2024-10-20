@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import ast
-from typing import TYPE_CHECKING, Iterable, List
+from typing import TYPE_CHECKING, Iterable
 
 if TYPE_CHECKING:
     from thriftpyi.proxies import TModuleProxy
@@ -30,7 +30,7 @@ def build_init(imports: Iterable[str]) -> ast.Module:
     )
 
 
-def _make_imports(proxy: TModuleProxy) -> List[ast.ImportFrom]:
+def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
     imports = []
     if proxy.has_structs():
         imports.append(_make_absolute_import("dataclasses", "dataclass"))
@@ -61,22 +61,22 @@ def _make_relative_import(names: Iterable[str]) -> ast.ImportFrom:
     )
 
 
-def _make_consts(interface: TModuleProxy) -> List[ast.stmt]:
+def _make_consts(interface: TModuleProxy) -> list[ast.stmt]:
     return [item.as_ast() for item in interface.get_consts()]
 
 
-def _make_exceptions(interface: TModuleProxy, strict: bool) -> List[ast.ClassDef]:
+def _make_exceptions(interface: TModuleProxy, strict: bool) -> list[ast.ClassDef]:
     return [
         item.with_options(ignore_required=not strict).as_ast(bases=["Exception"])
         for item in interface.get_exceptions()
     ]
 
 
-def _make_enums(interface: TModuleProxy) -> List[ast.ClassDef]:
+def _make_enums(interface: TModuleProxy) -> list[ast.ClassDef]:
     return [item.as_ast(bases=["IntEnum"]) for item in interface.get_enums()]
 
 
-def _make_structs(interface: TModuleProxy, strict: bool) -> List[ast.ClassDef]:
+def _make_structs(interface: TModuleProxy, strict: bool) -> list[ast.ClassDef]:
     return [
         item.with_options(ignore_required=not strict).as_ast(decorators=["dataclass"])
         for item in interface.get_structs()
@@ -85,7 +85,7 @@ def _make_structs(interface: TModuleProxy, strict: bool) -> List[ast.ClassDef]:
 
 def _make_service(
     interface: TModuleProxy, is_async: bool, strict: bool
-) -> List[ast.ClassDef]:
+) -> list[ast.ClassDef]:
     services = interface.get_services()
 
     return [

@@ -1,6 +1,10 @@
 default_language_version:
-    python: python3
+    python: python3.9
 repos:
+-   repo: https://github.com/asottile/pyupgrade
+    rev: v3.18.0
+    hooks:
+    -   id: pyupgrade
 -   repo: https://github.com/ambv/black
     rev: 22.6.0
     hooks:

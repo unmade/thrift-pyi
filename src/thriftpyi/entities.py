@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, List, Optional, Sequence, Type, Union
+from typing import TYPE_CHECKING, Sequence, Type, Union
 
 if TYPE_CHECKING:
     AnyFunctionDef = Union[ast.AsyncFunctionDef, ast.FunctionDef]
@@ -15,8 +15,8 @@ FieldValue = Union[str, int, bool, None]
 @dataclass
 class ModuleItem:
     name: str
-    fields: List[Field] = field(default_factory=list)
-    methods: List[Method] = field(default_factory=list)
+    fields: list[Field] = field(default_factory=list)
+    methods: list[Method] = field(default_factory=list)
 
     def with_options(
         self,
@@ -53,7 +53,7 @@ class ModuleItem:
         bases = bases or []
         decorators = decorators or []
 
-        body: List[ast.stmt] = []
+        body: list[ast.stmt] = []
         body.extend(entry.as_ast() for entry in self.fields)
         body.extend(entry.as_ast() for entry in self.methods)
 
@@ -74,8 +74,8 @@ class ModuleItem:
 @dataclass
 class Method:
     name: str
-    args: List[Field] = field(default_factory=list)
-    returns: List[Field] = field(default_factory=list)
+    args: list[Field] = field(default_factory=list)
+    returns: list[Field] = field(default_factory=list)
     is_async: bool = False
 
     def with_options(
@@ -139,7 +139,7 @@ class Method:
 @dataclass
 class Field:
     name: str
-    type: Optional[str]
+    type: str | None
     value: FieldValue
     required: bool
 
@@ -157,7 +157,7 @@ class Field:
             required=required,
         )
 
-    def as_ast(self) -> Union[ast.AnnAssign, ast.Assign]:
+    def as_ast(self) -> ast.AnnAssign | ast.Assign:
         if self.type is None:
             return ast.Assign(
                 targets=[ast.Name(id=self.name, ctx=ast.Store())],

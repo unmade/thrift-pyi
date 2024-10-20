@@ -10,7 +10,7 @@ if TYPE_CHECKING:
 todos: Dict[int, "TodoItem"] = {}
 
 
-class Dispatcher(object):
+class Dispatcher:
     def create(self, text: str, type: int) -> int:
         todo_id = max(todos.keys() or [0]) + 1
         created = datetime.datetime.now()

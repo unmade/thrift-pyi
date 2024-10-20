@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Tuple, cast
+from typing import cast
 
 from thriftpyi.entities import Field, FieldValue, Method, ModuleItem
 from thriftpyi.utils import get_python_type, guess_type
@@ -12,7 +12,7 @@ class TModuleProxy:
     def __init__(self, tmodule) -> None:
         self.tmodule = tmodule
 
-    def get_consts(self) -> List[Field]:
+    def get_consts(self) -> list[Field]:
         tconsts = (
             (name, value)
             for name, value in vars(self.tmodule).items()
@@ -20,27 +20,27 @@ class TModuleProxy:
         )
         return [self._make_const(tconst) for tconst in tconsts]
 
-    def get_enums(self) -> List[ModuleItem]:
+    def get_enums(self) -> list[ModuleItem]:
         return [
             self._make_enum(tenum) for tenum in self.tmodule.__thrift_meta__["enums"]
         ]
 
-    def get_exceptions(self) -> List[ModuleItem]:
+    def get_exceptions(self) -> list[ModuleItem]:
         return [
             self._make_exception(texc)
             for texc in self.tmodule.__thrift_meta__["exceptions"]
         ]
 
-    def get_imports(self) -> List[str]:
+    def get_imports(self) -> list[str]:
         return [item.__name__ for item in self.tmodule.__thrift_meta__["includes"]]
 
-    def get_services(self) -> List[ModuleItem]:
+    def get_services(self) -> list[ModuleItem]:
         return [
             self._make_service(tservice)
             for tservice in self.tmodule.__thrift_meta__["services"]
         ]
 
-    def get_structs(self) -> List[ModuleItem]:
+    def get_structs(self) -> list[ModuleItem]:
         return [
             self._make_struct(tstruct)
             for tstruct in self.tmodule.__thrift_meta__["structs"]
@@ -141,7 +141,7 @@ class TModuleProxy:
 class TSpecItemProxy:
     __slots__ = ("ttype", "name", "meta", "required")
 
-    def __init__(self, item: Tuple):
+    def __init__(self, item: tuple):
         ttype, name, *meta, required = item
         self.ttype = ttype
         self.name = name
@@ -157,7 +157,7 @@ class TSpecProxy:
         self.thrift_spec = [TSpecItemProxy(thrift_spec[k]) for k in sorted(thrift_spec)]
         self.default_spec = default_spec
 
-    def get_fields(self, *, ignore_type: bool = False) -> List[Field]:
+    def get_fields(self, *, ignore_type: bool = False) -> list[Field]:
         return [
             Field(
                 name=item.name,
