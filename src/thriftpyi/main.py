@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ast
 import subprocess
 import sys
 from pathlib import Path
@@ -7,7 +8,6 @@ from pathlib import Path
 import thriftpy2
 
 from thriftpyi import files, stubs
-from thriftpyi.compat import ast_unparse
 from thriftpyi.proxies import TModuleProxy
 
 
@@ -22,7 +22,7 @@ def thriftpyi(  # pylint: disable=too-many-locals
     interfaces = files.list_interfaces(interfaces_dir)
 
     stub = stubs.build_init(path.stem for path in interfaces)
-    files.save(ast_unparse(stub), to=output_dir / "__init__.pyi")
+    files.save(ast.unparse(stub), to=output_dir / "__init__.pyi")
 
     for path in interfaces:
         tmodule = thriftpy2.load(str(path))
@@ -33,7 +33,7 @@ def thriftpyi(  # pylint: disable=too-many-locals
             strict_fields=strict_fields,
             strict_methods=strict_methods,
         )
-        files.save(ast_unparse(stub), to=output_dir / path.with_suffix(".pyi").name)
+        files.save(ast.unparse(stub), to=output_dir / path.with_suffix(".pyi").name)
 
     lint(output_dir)
 

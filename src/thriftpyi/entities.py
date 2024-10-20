@@ -62,7 +62,7 @@ class ModuleItem:
 
         return ast.ClassDef(
             name=self.name,
-            bases=[[ast.Name(id=base, ctx=ast.Load())] for base in bases],
+            bases=[ast.Name(id=base, ctx=ast.Load()) for base in bases],
             keywords=[],
             body=body,
             decorator_list=[
@@ -117,7 +117,7 @@ class Method:
 
         return factory(
             name=self.name,
-            args=ast.arguments(
+            args=ast.arguments(  # type: ignore[call-overload]
                 posonlyargs=[],
                 args=[
                     ast.arg(arg="self", annotation=None),
