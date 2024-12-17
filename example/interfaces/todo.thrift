@@ -21,7 +21,16 @@ struct TodoItem {
     7: required bool is_favorite = false
 }
 
+
 typedef list<TodoItem> TodoItemList
+
+
+struct TodoCounter {
+    1: required map<i32, TodoItem> todos = {}
+    2: required set<i32> plain_ids = [1, 2, 3]
+    3: required list<i32> note_ids = []
+    4: required set<i32> checkboxes_ids = []
+}
 
 
 service Todo extends shared.Service {

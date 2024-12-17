@@ -5,13 +5,13 @@ from example.app import interfaces
 from thriftpy2.rpc import make_server
 
 if TYPE_CHECKING:
-    from example.app.interfaces.todo import TodoItem
+    from example.app.interfaces.todo import TodoItem, TodoType
 
 todos: Dict[int, "TodoItem"] = {}
 
 
 class Dispatcher:
-    def create(self, text: str, type: int) -> int:
+    def create(self, text: str, type: TodoType) -> int:
         todo_id = max(todos.keys() or [0]) + 1
         created = datetime.datetime.now()
         todos[todo_id] = interfaces.todo.TodoItem(

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import *
 from . import dates
@@ -18,6 +18,13 @@ class TodoItem:
     is_deleted: bool
     picture: Optional[bytes] = None
     is_favorite: bool = False
+
+@dataclass
+class TodoCounter:
+    todos: Dict[int, TodoItem] = field(default_factory=dict)
+    plain_ids: Set[int] = field(default_factory=lambda: {1, 2, 3})
+    note_ids: List[int] = field(default_factory=list)
+    checkboxes_ids: Set[int] = field(default_factory=set)
 
 class Todo:
     async def create(self, text: str, type: TodoType) -> int: ...

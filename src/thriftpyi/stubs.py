@@ -33,7 +33,7 @@ def build_init(imports: Iterable[str]) -> ast.Module:
 def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
     imports = []
     if proxy.has_structs():
-        imports.append(_make_absolute_import("dataclasses", "dataclass"))
+        imports.append(_make_absolute_import("dataclasses", "dataclass, field"))
     if proxy.has_enums():
         imports.append(_make_absolute_import("enum", "IntEnum"))
 
