@@ -1,10 +1,6 @@
 from dataclasses import dataclass
 from typing import *
 
-INT_CONST_1: int = 1234
-MAP_CONST: Dict[str, str] = {"hello": "world", "goodnight": "moon"}
-INT_CONST_2: int = 1234
-
 class NotFound(Exception):
     message: Optional[str] = "Not Found"
 
@@ -16,6 +12,10 @@ class EmptyException(Exception): ...
 class LimitOffset:
     limit: Optional[int] = None
     offset: Optional[int] = None
+
+INT_CONST_1: int = 1234
+MAP_CONST: Dict[str, str] = {"hello": "world", "goodnight": "moon"}
+INT_CONST_2: int = 1234
 
 class Service:
     def ping(self) -> str: ...

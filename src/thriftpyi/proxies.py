@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import cast
 
-from thriftpyi.entities import Field, FieldValue, Method, ModuleItem
+from thriftpyi.entities import Field, FieldValue, Method, ModuleItem, StructField
 from thriftpyi.utils import get_python_type, guess_type
 
 
@@ -127,7 +127,7 @@ class TModuleProxy:
 
     @staticmethod
     def _make_struct(tclass) -> ModuleItem:
-        spec = TSpecProxy(
+        spec = TStructSpecProxy(
             module_name=tclass.__module__,
             thrift_spec=tclass.thrift_spec,
             default_spec=dict(tclass.default_spec),
@@ -188,3 +188,16 @@ class TSpecProxy:
     def _get_default_value(self, item: TSpecItemProxy) -> FieldValue:
         default_value = self.default_spec.get(item.name)
         return cast(FieldValue, default_value)
+
+
+class TStructSpecProxy(TSpecProxy):
+    def get_fields(self, *, ignore_type: bool = False) -> list[Field]:
+        return [
+            StructField(
+                name=item.name,
+                type=self._get_python_type(item) if not ignore_type else None,
+                value=self._get_default_value(item),
+                required=item.required,
+            )
+            for item in self.thrift_spec
+        ]

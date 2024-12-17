@@ -10,8 +10,8 @@ from thriftpyi.cli import main
     "expected_dir,args",
     [
         ("tests/stubs/expected/sync", ["--strict-optional"]),
-        # ("tests/stubs/expected/async", ["--async", "--strict-optional"]),
-        # ("tests/stubs/expected/optional", []),
+        ("tests/stubs/expected/async", ["--async", "--strict-optional"]),
+        ("tests/stubs/expected/optional", []),
     ],
 )
 def test_main(capsys, expected_dir, args):

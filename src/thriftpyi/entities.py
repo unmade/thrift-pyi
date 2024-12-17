@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Sequence, Type, Union
+from typing import (
+    TYPE_CHECKING,
+    MutableMapping,
+    MutableSequence,
+    MutableSet,
+    Sequence,
+    Type,
+    Union,
+)
 
 if TYPE_CHECKING:
     AnyFunctionDef = Union[ast.AsyncFunctionDef, ast.FunctionDef]
@@ -161,7 +169,7 @@ class Field:
         if self.type is None:
             return ast.Assign(
                 targets=[ast.Name(id=self.name, ctx=ast.Store())],
-                value=ast.Constant(value=self.value, kind=None),
+                value=self._make_ast_value(),
                 lineno=0,
             )
 
@@ -173,7 +181,7 @@ class Field:
         if self.required and self.value is None:
             value = None
         else:
-            value = ast.Constant(value=self.value, kind=None)
+            value = self._make_ast_value()
 
         return ast.AnnAssign(
             target=ast.Name(id=self.name, ctx=ast.Store()),
@@ -181,3 +189,30 @@ class Field:
             value=value,
             simple=1,
         )
+
+    def _make_ast_value(self) -> ast.expr:
+        return ast.Constant(value=self.value, kind=None)
+
+
+@dataclass
+class StructField(Field):
+    def _make_ast_value(self) -> ast.expr:
+        if isinstance(self.value, (MutableSequence, MutableSet, MutableMapping)):
+            if self.value:
+                value = ast.Lambda(
+                    args=[], body=ast.Constant(value=self.value, kind=None)
+                )
+            else:
+                value = ast.Name(id=self.value.__class__.__name__, ctx=ast.Load())
+
+            return ast.Call(
+                func=ast.Name(id="field", ctx=ast.Load()),
+                args=[],
+                keywords=[
+                    ast.keyword(
+                        arg="default_factory",
+                        value=value,
+                    )
+                ],
+            )
+        return super()._make_ast_value()
