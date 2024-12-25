@@ -54,17 +54,26 @@ class TModuleProxy:
 
     def _make_const(self, tconst) -> Field:
         name, value = tconst
+
+        known_modules = {
+            module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
+        }
+
+        module_name = None
+        if hasattr(value, "__class__"):
+            module_name = value.__class__.__module__
+            if module_name not in known_modules:
+                module_name = None
+
         return Field(
             name=name,
             type=guess_type(
                 value,
-                known_modules={
-                    module.__name__
-                    for module in self.tmodule.__thrift_meta__["includes"]
-                },
+                known_modules=known_modules,
                 known_structs=self.tmodule.__thrift_meta__["structs"],
             ),
             value=value,
+            module=module_name,
             required=True,
         )
 

@@ -26,6 +26,10 @@ class TodoCounter:
     note_ids: Optional[List[int]] = field(default_factory=list)
     checkboxes_ids: Optional[Set[int]] = field(default_factory=set)
 
+default_created_date: dates.DateTime = dates.DateTime(
+    year=2024, month=12, day=25, hour=0, minute=0, second=0, microsecond=0
+)
+
 class Todo:
     def create(self, text: str, type: TodoType) -> int: ...
     def update(self, item: TodoItem) -> None: ...
