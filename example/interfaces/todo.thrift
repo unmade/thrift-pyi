@@ -4,6 +4,17 @@ include "shared.thrift"
 include "dates.thrift"
 
 
+const dates.DateTime default_created_date = {
+    "year": 2024,
+    "month": 12,
+    "day": 25,
+    "hour": 0,
+    "minute": 0,
+    "second": 0,
+    "microsecond": 0
+}
+
+
 enum TodoType {
     PLAIN = 1,
     NOTE = 2,

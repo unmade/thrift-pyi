@@ -150,6 +150,7 @@ class Field:
     type: str | None
     value: FieldValue
     required: bool
+    module: str | None = None
 
     def with_options(self, *, ignore_optional: bool, ignore_required: bool) -> Field:
         required = self.required
@@ -163,6 +164,7 @@ class Field:
             type=self.type,
             value=self.value,
             required=required,
+            module=self.module,
         )
 
     def as_ast(self) -> ast.AnnAssign | ast.Assign:
@@ -191,6 +193,9 @@ class Field:
         )
 
     def _make_ast_value(self) -> ast.expr:
+        if self.module:
+            body = ast.parse(f"{self.module}.{self.value}").body
+            return body[0].value  # type: ignore[attr-defined, no-any-return]
         return ast.Constant(value=self.value, kind=None)
 
 
