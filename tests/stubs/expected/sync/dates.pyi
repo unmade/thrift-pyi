@@ -1,15 +1,16 @@
 from dataclasses import dataclass
 from typing import *
+from . import _typedefs
 
 @dataclass
 class DateTime:
-    year: int
-    month: int
-    day: int
-    hour: int
-    minute: int
-    second: int
-    microsecond: Optional[int] = None
+    year: _typedefs.I16
+    month: _typedefs.Byte
+    day: _typedefs.Byte
+    hour: _typedefs.I16
+    minute: _typedefs.Byte
+    second: _typedefs.Byte
+    microsecond: Optional[_typedefs.I64] = None
 
 @dataclass
 class Date: ...

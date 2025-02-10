@@ -24,6 +24,9 @@ def thriftpyi(  # pylint: disable=too-many-locals
     stub = stubs.build_init(path.stem for path in interfaces)
     files.save(ast.unparse(stub), to=output_dir / "__init__.pyi")
 
+    stub = stubs.build_typedefs()
+    files.save(ast.unparse(stub), to=output_dir / "_typedefs.pyi")
+
     for path in interfaces:
         tmodule = thriftpy2.load(str(path))
         proxy = TModuleProxy(tmodule)
