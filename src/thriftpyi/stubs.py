@@ -30,6 +30,48 @@ def build_init(imports: Iterable[str]) -> ast.Module:
     )
 
 
+def build_typedefs() -> ast.Module:
+    types_map = {
+        "Binary": ("bytes", "BINARY"),
+        "Bool": ("bool", "BOOL"),
+        "Byte": ("int", "BYTE"),
+        "Double": ("float", "DOUBLE"),
+        "I16": ("int", "I16"),
+        "I32": ("int", "I32"),
+        "I64": ("int", "I64"),
+        "String": ("str", "STRING"),
+    }
+
+    body: list[ast.stmt] = [
+        ast.ImportFrom(
+            module="typing",
+            names=[ast.alias(name="Annotated")],
+            level=0,
+        )
+    ]
+
+    for alias, (base_type, thrift_type) in types_map.items():
+        assign = ast.Assign(
+            targets=[ast.Name(id=alias)],
+            value=ast.Subscript(
+                value=ast.Name(id="Annotated"),
+                slice=ast.Tuple(
+                    elts=[
+                        ast.Name(id=base_type),
+                        ast.Dict(
+                            keys=[ast.Constant(value="thrift_type")],
+                            values=[ast.Constant(value=thrift_type)],
+                        ),
+                    ],
+                ),
+            ),
+            lineno=0,
+        )
+        body.append(assign)
+
+    return ast.Module(body=body, type_ignores=[])
+
+
 def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
     imports = []
     if proxy.has_structs():
@@ -38,6 +80,7 @@ def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
         imports.append(_make_absolute_import("enum", "IntEnum"))
 
     imports.append(_make_absolute_import("typing", "*"))
+    imports.append(_make_relative_import(["_typedefs"]))
     imports.extend(
         _make_relative_import([name]) for name in sorted(proxy.get_imports())
     )

@@ -47,43 +47,43 @@ def get_python_type(ttype: int, meta: List) -> str:
 
 def _get_bool(meta: List) -> str:
     del meta
-    return "bool"
+    return "_typedefs.Bool"
 
 
 def _get_double(meta: List) -> str:
     del meta
-    return "float"
+    return "_typedefs.Double"
 
 
 def _get_byte(meta: List) -> str:
     del meta
-    return "int"
+    return "_typedefs.Byte"
 
 
 def _get_binary(meta: List) -> str:
     del meta
-    return "bytes"
+    return "_typedefs.Binary"
 
 
 def _get_i16(meta: List) -> str:
     del meta
-    return "int"
+    return "_typedefs.I16"
 
 
 def _get_i32(meta: List) -> str:
     if meta and meta[0] is not None:
         return f"{meta[0].__module__}.{meta[0].__name__}"
-    return "int"
+    return "_typedefs.I32"
 
 
 def _get_i64(meta: List) -> str:
     del meta
-    return "int"
+    return "_typedefs.I64"
 
 
 def _get_str(meta: List) -> str:
     del meta
-    return "str"
+    return "_typedefs.String"
 
 
 def _get_struct(meta: List) -> str:

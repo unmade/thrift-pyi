@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import *
+from . import _typedefs
 from . import dates
 from . import shared
 
@@ -11,32 +12,32 @@ class TodoType(IntEnum):
 
 @dataclass
 class TodoItem:
-    id: Optional[int] = None
-    text: Optional[str] = None
+    id: Optional[_typedefs.I32] = None
+    text: Optional[_typedefs.String] = None
     type: Optional[TodoType] = None
     created: Optional[dates.DateTime] = None
-    is_deleted: Optional[bool] = None
-    picture: Optional[bytes] = None
-    is_favorite: Optional[bool] = False
+    is_deleted: Optional[_typedefs.Bool] = None
+    picture: Optional[_typedefs.Binary] = None
+    is_favorite: Optional[_typedefs.Bool] = False
 
 @dataclass
 class TodoCounter:
-    todos: Optional[Dict[int, TodoItem]] = field(default_factory=dict)
-    plain_ids: Optional[Set[int]] = field(default_factory=lambda: {1, 2, 3})
-    note_ids: Optional[List[int]] = field(default_factory=list)
-    checkboxes_ids: Optional[Set[int]] = field(default_factory=set)
+    todos: Optional[Dict[_typedefs.I32, TodoItem]] = field(default_factory=dict)
+    plain_ids: Optional[Set[_typedefs.I32]] = field(default_factory=lambda: {1, 2, 3})
+    note_ids: Optional[List[_typedefs.I32]] = field(default_factory=list)
+    checkboxes_ids: Optional[Set[_typedefs.I32]] = field(default_factory=set)
 
 default_created_date: dates.DateTime = dates.DateTime(
     year=2024, month=12, day=25, hour=0, minute=0, second=0, microsecond=0
 )
 
 class Todo:
-    def create(self, text: str, type: TodoType) -> int: ...
+    def create(self, text: _typedefs.String, type: TodoType) -> _typedefs.I32: ...
     def update(self, item: TodoItem) -> None: ...
-    def get(self, id: int) -> TodoItem: ...
+    def get(self, id: _typedefs.I32) -> TodoItem: ...
     def all(self, pager: shared.LimitOffset) -> List[TodoItem]: ...
-    def filter(self, ids: List[int]) -> List[TodoItem]: ...
-    def stats(self) -> Dict[int, float]: ...
-    def types(self) -> Set[int]: ...
+    def filter(self, ids: List[_typedefs.I32]) -> List[TodoItem]: ...
+    def stats(self) -> Dict[_typedefs.I32, _typedefs.Double]: ...
+    def types(self) -> Set[_typedefs.I16]: ...
     def groupby(self) -> Dict[TodoType, List[TodoItem]]: ...
-    def ping(self) -> str: ...
+    def ping(self) -> _typedefs.String: ...
