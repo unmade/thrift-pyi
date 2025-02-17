@@ -44,10 +44,39 @@ def build_typedefs() -> ast.Module:
 
     body: list[ast.stmt] = [
         ast.ImportFrom(
+            module="dataclasses",
+            names=[ast.alias(name="dataclass")],
+            level=0,
+        ),
+        ast.ImportFrom(
             module="typing",
             names=[ast.alias(name="Annotated")],
             level=0,
-        )
+        ),
+        ast.ClassDef(
+            name="Metadata",
+            bases=[],
+            keywords=[
+                ast.keyword(
+                    arg="frozen",
+                    value=ast.Constant(value=True),
+                ),
+            ],
+            body=[
+                ast.AnnAssign(
+                    target=ast.Name(id="thrift_type"),
+                    annotation=ast.Name(id="str"),
+                    simple=1,
+                ),
+            ],
+            decorator_list=[
+                ast.Call(
+                    func=ast.Name(id="dataclass"),
+                    args=[],
+                    keywords=[],
+                ),
+            ],
+        ),
     ]
 
     for alias, (base_type, thrift_type) in types_map.items():
@@ -58,9 +87,15 @@ def build_typedefs() -> ast.Module:
                 slice=ast.Tuple(
                     elts=[
                         ast.Name(id=base_type),
-                        ast.Dict(
-                            keys=[ast.Constant(value="thrift_type")],
-                            values=[ast.Constant(value=thrift_type)],
+                        ast.Call(
+                            func=ast.Name(id="Metadata"),
+                            args=[],
+                            keywords=[
+                                ast.keyword(
+                                    arg="thrift_type",
+                                    value=ast.Constant(value=thrift_type),
+                                ),
+                            ],
                         ),
                     ],
                 ),
