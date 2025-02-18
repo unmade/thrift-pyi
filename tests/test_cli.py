@@ -22,7 +22,14 @@ def test_main(capsys, expected_dir, args):
 
     main([input_dir, "--output", output_dir, *args])
 
-    pyi_files = ["__init__.pyi", "dates.pyi", "shared.pyi", "todo.pyi", "todo_v2.pyi"]
+    pyi_files = [
+        "__init__.pyi",
+        "_typedefs.pyi",
+        "dates.pyi",
+        "shared.pyi",
+        "todo.pyi",
+        "todo_v2.pyi",
+    ]
     match, mismatch, errors = filecmp.cmpfiles(output_dir, expected_dir, pyi_files)
     assert errors == []
     assert mismatch == []

@@ -56,12 +56,7 @@ def build_typedefs() -> ast.Module:
         ast.ClassDef(
             name="Metadata",
             bases=[],
-            keywords=[
-                ast.keyword(
-                    arg="frozen",
-                    value=ast.Constant(value=True),
-                ),
-            ],
+            keywords=[],
             body=[
                 ast.AnnAssign(
                     target=ast.Name(id="thrift_type"),
@@ -73,7 +68,12 @@ def build_typedefs() -> ast.Module:
                 ast.Call(
                     func=ast.Name(id="dataclass"),
                     args=[],
-                    keywords=[],
+                    keywords=[
+                        ast.keyword(
+                            arg="frozen",
+                            value=ast.Constant(value=True),
+                        ),
+                    ],
                 ),
             ],
         ),
