@@ -18,6 +18,11 @@ class TodoItem:
     created: dates.DateTime
     is_deleted: _typedefs.Bool
     picture: Optional[_typedefs.Binary] = None
+    createdWithDefault: dates.DateTime = field(
+        default_factory=lambda: DateTime(
+            year=1970, month=1, day=1, hour=0, minute=0, second=0, microsecond=0
+        )
+    )
     is_favorite: _typedefs.Bool = False
 
 @dataclass
