@@ -2,15 +2,7 @@ from __future__ import annotations
 
 import ast
 from dataclasses import dataclass, field
-from typing import (
-    TYPE_CHECKING,
-    MutableMapping,
-    MutableSequence,
-    MutableSet,
-    Sequence,
-    Type,
-    Union,
-)
+from typing import TYPE_CHECKING, Hashable, Sequence, Type, Union
 
 if TYPE_CHECKING:
     AnyFunctionDef = Union[ast.AsyncFunctionDef, ast.FunctionDef]
@@ -202,7 +194,7 @@ class Field:
 @dataclass
 class StructField(Field):
     def _make_ast_value(self) -> ast.expr:
-        if isinstance(self.value, (MutableSequence, MutableSet, MutableMapping)):
+        if not isinstance(self.value, Hashable):
             if self.value:
                 value = ast.Lambda(
                     args=[], body=ast.Constant(value=self.value, kind=None)

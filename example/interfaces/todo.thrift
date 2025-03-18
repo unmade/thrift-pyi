@@ -29,7 +29,8 @@ struct TodoItem {
     4: required dates.DateTime created
     5: required bool is_deleted
     6: optional binary picture
-    7: required bool is_favorite = false
+    7: required dates.DateTime createdWithDefault = dates.EPOCH
+    8: required bool is_favorite = false
 }
 
 
