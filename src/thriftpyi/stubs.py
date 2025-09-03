@@ -7,15 +7,21 @@ if TYPE_CHECKING:
     from thriftpyi.proxies import TModuleProxy
 
 
-def build(
-    proxy: TModuleProxy, is_async: bool, strict_fields: bool, strict_methods: bool
+def build(  # pylint: disable=too-many-arguments
+    # pylint: disable=too-many-positional-arguments
+    proxy: TModuleProxy,
+    is_async: bool,
+    strict_fields: bool,
+    strict_methods: bool,
+    frozen: bool = False,
+    kw_only: bool = False,
 ) -> ast.Module:
     return ast.Module(
         body=[
             *_make_imports(proxy),
             *_make_exceptions(proxy, strict=strict_fields),
             *_make_enums(proxy),
-            *_make_structs(proxy, strict=strict_fields),
+            *_make_structs(proxy, strict=strict_fields, frozen=frozen, kw_only=kw_only),
             *_make_consts(proxy),
             *_make_service(proxy, is_async, strict=strict_methods),
         ],
@@ -154,11 +160,34 @@ def _make_enums(interface: TModuleProxy) -> list[ast.ClassDef]:
     return [item.as_ast(bases=["IntEnum"]) for item in interface.get_enums()]
 
 
-def _make_structs(interface: TModuleProxy, strict: bool) -> list[ast.ClassDef]:
-    return [
-        item.with_options(ignore_required=not strict).as_ast(decorators=["dataclass"])
-        for item in interface.get_structs()
-    ]
+def _make_structs(
+    interface: TModuleProxy, strict: bool, frozen: bool = False, kw_only: bool = False
+) -> list[ast.ClassDef]:
+    structs = []
+    for item in interface.get_structs():
+        cls_def = item.with_options(ignore_required=not strict).as_ast(decorators=[])
+
+        # Build the dataclass decorator with parameters
+        keywords = []
+        if frozen:
+            keywords.append(ast.keyword(arg="frozen", value=ast.Constant(value=True)))
+        if kw_only:
+            keywords.append(ast.keyword(arg="kw_only", value=ast.Constant(value=True)))
+
+        dataclass_decorator = (
+            ast.Call(
+                func=ast.Name(id="dataclass", ctx=ast.Load()),
+                args=[],
+                keywords=keywords,
+            )
+            if keywords
+            else ast.Name(id="dataclass", ctx=ast.Load())
+        )
+
+        cls_def.decorator_list = [dataclass_decorator]
+        structs.append(cls_def)
+
+    return structs
 
 
 def _make_service(
