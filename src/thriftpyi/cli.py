@@ -28,6 +28,18 @@ def make_parser() -> argparse.ArgumentParser:
         action="store_true",
         help="If not specified all fields will be optional with default to None",
     )
+    parser.add_argument(
+        "--frozen",
+        dest="frozen",
+        action="store_true",
+        help="Whether to generate frozen dataclasses",
+    )
+    parser.add_argument(
+        "--kw-only",
+        dest="kw_only",
+        action="store_true",
+        help="Whether to generate kw_only dataclasses",
+    )
     return parser
 
 
@@ -40,5 +52,7 @@ def main(argv=None) -> int:
         is_async=args.is_async,
         strict_fields=args.strict_optional,
         strict_methods=True,
+        frozen=args.frozen,
+        kw_only=args.kw_only,
     )
     return 0

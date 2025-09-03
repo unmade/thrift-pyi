@@ -11,12 +11,15 @@ from thriftpyi import files, stubs
 from thriftpyi.proxies import TModuleProxy
 
 
-def thriftpyi(  # pylint: disable=too-many-locals
+def thriftpyi(  # pylint: disable=too-many-locals,too-many-arguments
+    # pylint: disable=too-many-positional-arguments
     interfaces_dir: str,
     output_dir: Path,
     is_async: bool = False,
     strict_fields: bool = False,
     strict_methods: bool = True,
+    frozen: bool = False,
+    kw_only: bool = False,
 ) -> None:
     output_dir = output_dir.resolve()
     interfaces = files.list_interfaces(interfaces_dir)
@@ -35,6 +38,8 @@ def thriftpyi(  # pylint: disable=too-many-locals
             is_async=is_async,
             strict_fields=strict_fields,
             strict_methods=strict_methods,
+            frozen=frozen,
+            kw_only=kw_only,
         )
         files.save(ast.unparse(stub), to=output_dir / path.with_suffix(".pyi").name)
 
