@@ -12,7 +12,6 @@ from thriftpyi.proxies import TModuleProxy
 
 
 def thriftpyi(  # pylint: disable=too-many-locals,too-many-arguments
-    # pylint: disable=too-many-positional-arguments
     interfaces_dir: str,
     output_dir: Path,
     is_async: bool = False,
