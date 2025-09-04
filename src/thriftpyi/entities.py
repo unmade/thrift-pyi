@@ -48,7 +48,7 @@ class ModuleItem:
         self,
         *,
         bases: Sequence[str] = None,
-        decorators: Sequence[str] = None,
+        decorators: Sequence[ast.expr] = None,
     ) -> ast.ClassDef:
         bases = bases or []
         decorators = decorators or []
@@ -65,9 +65,7 @@ class ModuleItem:
             bases=[ast.Name(id=base, ctx=ast.Load()) for base in bases],
             keywords=[],
             body=body,
-            decorator_list=[
-                ast.Name(id=decorator, ctx=ast.Load()) for decorator in decorators
-            ],
+            decorator_list=list(decorators or []),
         )
 
 

@@ -8,7 +8,6 @@ if TYPE_CHECKING:
 
 
 def build(  # pylint: disable=too-many-arguments
-    # pylint: disable=too-many-positional-arguments
     proxy: TModuleProxy,
     is_async: bool,
     strict_fields: bool,
@@ -160,34 +159,28 @@ def _make_enums(interface: TModuleProxy) -> list[ast.ClassDef]:
     return [item.as_ast(bases=["IntEnum"]) for item in interface.get_enums()]
 
 
+def _dataclass_decorator(*, frozen: bool, kw_only: bool) -> ast.expr:
+    kws = []
+    if frozen:
+        kws.append(ast.keyword("frozen", ast.Constant(True)))
+    if kw_only:
+        kws.append(ast.keyword("kw_only", ast.Constant(True)))
+    return (
+        ast.Name("dataclass", ast.Load())
+        if not kws
+        else ast.Call(ast.Name("dataclass", ast.Load()), [], kws)
+    )
+
+
 def _make_structs(
     interface: TModuleProxy, strict: bool, frozen: bool = False, kw_only: bool = False
 ) -> list[ast.ClassDef]:
-    structs = []
-    for item in interface.get_structs():
-        cls_def = item.with_options(ignore_required=not strict).as_ast(decorators=[])
-
-        # Build the dataclass decorator with parameters
-        keywords = []
-        if frozen:
-            keywords.append(ast.keyword(arg="frozen", value=ast.Constant(value=True)))
-        if kw_only:
-            keywords.append(ast.keyword(arg="kw_only", value=ast.Constant(value=True)))
-
-        dataclass_decorator = (
-            ast.Call(
-                func=ast.Name(id="dataclass", ctx=ast.Load()),
-                args=[],
-                keywords=keywords,
-            )
-            if keywords
-            else ast.Name(id="dataclass", ctx=ast.Load())
+    return [
+        item.with_options(ignore_required=not strict).as_ast(
+            decorators=[_dataclass_decorator(frozen=frozen, kw_only=kw_only)]
         )
-
-        cls_def.decorator_list = [dataclass_decorator]
-        structs.append(cls_def)
-
-    return structs
+        for item in interface.get_structs()
+    ]
 
 
 def _make_service(
