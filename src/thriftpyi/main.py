@@ -12,6 +12,7 @@ from thriftpyi.proxies import TModuleProxy
 
 
 def thriftpyi(  # pylint: disable=too-many-locals,too-many-arguments
+    *,
     interfaces_dir: str,
     output_dir: Path,
     is_async: bool = False,
@@ -33,7 +34,7 @@ def thriftpyi(  # pylint: disable=too-many-locals,too-many-arguments
         tmodule = thriftpy2.load(str(path))
         proxy = TModuleProxy(tmodule)
         stub = stubs.build(
-            proxy,
+            proxy=proxy,
             is_async=is_async,
             strict_fields=strict_fields,
             strict_methods=strict_methods,
