@@ -15,6 +15,10 @@ from thriftpyi.cli import main
         ("tests/stubs/expected/frozen", ["--frozen"]),
         ("tests/stubs/expected/kw_only", ["--kw-only"]),
         ("tests/stubs/expected/frozen_kw_only", ["--frozen", "--kw-only"]),
+        (
+            "tests/stubs/expected/frozen_kw_only_sync",
+            ["--frozen", "--kw-only", "--strict-optional"],
+        ),
     ],
 )
 def test_main(capsys, expected_dir, args):
