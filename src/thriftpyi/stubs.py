@@ -8,6 +8,7 @@ if TYPE_CHECKING:
 
 
 def build(  # pylint: disable=too-many-arguments
+    *,
     proxy: TModuleProxy,
     is_async: bool,
     strict_fields: bool,

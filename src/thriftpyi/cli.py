@@ -47,8 +47,8 @@ def main(argv=None) -> int:
     parser = make_parser()
     args = parser.parse_args(argv)
     thriftpyi(
-        args.interfaces_dir,
-        args.output_dir,
+        interfaces_dir=args.interfaces_dir,
+        output_dir=args.output_dir,
         is_async=args.is_async,
         strict_fields=args.strict_optional,
         strict_methods=True,
