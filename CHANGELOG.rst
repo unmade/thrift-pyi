@@ -3,6 +3,13 @@
 ###########
 
 *********************
+ v2.2.0 (2025-09-05)
+*********************
+
+-  Add --frozen and --kw-only flags for dataclass generation (by
+   `@FrankPortman <https://github.com/FrankPortman>`_)
+
+*********************
  v2.1.0 (2025-03-18)
 *********************
 
