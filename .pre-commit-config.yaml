@@ -9,7 +9,7 @@ repos:
     rev: 22.6.0
     hooks:
     -   id: black
--   repo: https://github.com/humitos/mirrors-autoflake
+-   repo: https://github.com/PyCQA/autoflake
     rev: v1.1
     hooks:
     -   id: autoflake
