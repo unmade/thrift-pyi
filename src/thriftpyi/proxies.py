@@ -134,12 +134,14 @@ class TModuleProxy:
             ],
         )
 
-    @staticmethod
-    def _make_struct(tclass) -> ModuleItem:
+    def _make_struct(self, tclass) -> ModuleItem:
         spec = TStructSpecProxy(
             module_name=tclass.__module__,
             thrift_spec=tclass.thrift_spec,
             default_spec=dict(tclass.default_spec),
+            known_modules={
+                module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
+            },
         )
         return ModuleItem(
             name=tclass.__name__,
@@ -200,13 +202,24 @@ class TSpecProxy:
 
 
 class TStructSpecProxy(TSpecProxy):
+    def __init__(self, module_name: str, thrift_spec, default_spec, known_modules=None):
+        super().__init__(module_name, thrift_spec, default_spec)
+        self.known_modules = known_modules or set()
+
+    def _get_module_for_value(self, value) -> str | None:
+        if value and hasattr(value, "__class__"):
+            module_name = value.__class__.__module__
+            return module_name if module_name in self.known_modules else None
+        return None
+
     def get_fields(self, *, ignore_type: bool = False) -> list[Field]:
         return [
             StructField(
                 name=item.name,
                 type=self._get_python_type(item) if not ignore_type else None,
-                value=self._get_default_value(item),
+                value=(default_value := self._get_default_value(item)),
                 required=item.required,
+                module=self._get_module_for_value(default_value),
             )
             for item in self.thrift_spec
         ]

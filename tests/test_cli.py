@@ -1,5 +1,7 @@
+import ast
 import filecmp
 import shutil
+from pathlib import Path
 
 import pytest
 
@@ -37,6 +39,18 @@ def test_main(capsys, expected_dir, args):
         "todo.pyi",
         "todo_v2.pyi",
     ]
+
+    # Validate that all generated files are syntactically valid Python
+    for pyi_file in pyi_files:
+        file_path = Path(output_dir) / pyi_file
+        with open(file_path) as f:
+            content = f.read()
+            try:
+                ast.parse(content)
+            except SyntaxError as e:
+                pytest.fail(f"Generated file {pyi_file} has invalid Python syntax: {e}")
+
+    # Check that files match expected output
     match, mismatch, errors = filecmp.cmpfiles(output_dir, expected_dir, pyi_files)
     assert errors == []
     assert mismatch == []

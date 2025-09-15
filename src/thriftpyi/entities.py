@@ -194,9 +194,7 @@ class StructField(Field):
     def _make_ast_value(self) -> ast.expr:
         if not isinstance(self.value, Hashable):
             if self.value:
-                value = ast.Lambda(
-                    args=[], body=ast.Constant(value=self.value, kind=None)
-                )
+                value = ast.Lambda(args=[], body=super()._make_ast_value())
             else:
                 value = ast.Name(id=self.value.__class__.__name__, ctx=ast.Load())
 
