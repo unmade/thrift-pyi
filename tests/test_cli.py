@@ -1,5 +1,6 @@
 import filecmp
 import shutil
+import subprocess
 import sys
 
 import pytest
@@ -82,10 +83,8 @@ print("Success: TodoItem instantiated")
     )
 
     # Run the test script
-    import subprocess
-
     result = subprocess.run(
-        [sys.executable, str(test_script)], capture_output=True, text=True
+        [sys.executable, str(test_script)], capture_output=True, text=True, check=False
     )
 
     # Check for NameError specifically
@@ -96,7 +95,9 @@ print("Success: TodoItem instantiated")
     assert "Success" in result.stdout
 
 
-@pytest.mark.skipif(sys.version_info < (3, 10), reason="kw_only requires Python 3.10+")  # pragma: no cover
+@pytest.mark.skipif(
+    sys.version_info < (3, 10), reason="kw_only requires Python 3.10+"
+)  # pragma: no cover
 def test_generated_code_with_kw_only_is_importable(tmp_path):  # pragma: no cover
     """Test that generated code with kw_only can actually be imported and used."""
     input_dir = "example/interfaces"
@@ -132,10 +133,8 @@ print("Success: TodoItem instantiated")
     )
 
     # Run the test script
-    import subprocess
-
     result = subprocess.run(
-        [sys.executable, str(test_script)], capture_output=True, text=True
+        [sys.executable, str(test_script)], capture_output=True, text=True, check=False
     )
 
     # Check for NameError specifically
