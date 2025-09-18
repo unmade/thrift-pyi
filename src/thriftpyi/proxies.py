@@ -1,9 +1,12 @@
 from __future__ import annotations
 
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from thriftpyi.entities import Field, FieldValue, Method, ModuleItem, StructField
-from thriftpyi.utils import get_python_type, guess_type
+from thriftpyi.utils import get_module_for_value, get_python_type, guess_type
+
+if TYPE_CHECKING:
+    from collections.abc import Collection
 
 
 class TModuleProxy:
@@ -59,11 +62,7 @@ class TModuleProxy:
             module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
         }
 
-        module_name = None
-        if hasattr(value, "__class__"):
-            module_name = value.__class__.__module__
-            if module_name not in known_modules:
-                module_name = None
+        module_name = get_module_for_value(value, known_modules)
 
         return Field(
             name=name,
@@ -161,12 +160,19 @@ class TSpecItemProxy:
 
 
 class TSpecProxy:
-    __slots__ = ("module_name", "thrift_spec", "default_spec")
+    __slots__ = ("module_name", "thrift_spec", "default_spec", "known_modules")
 
-    def __init__(self, module_name: str, thrift_spec, default_spec):
+    def __init__(
+        self,
+        module_name: str,
+        thrift_spec,
+        default_spec,
+        known_modules: Collection[str] = (),
+    ) -> None:
         self.module_name = module_name
         self.thrift_spec = [TSpecItemProxy(thrift_spec[k]) for k in sorted(thrift_spec)]
         self.default_spec = default_spec
+        self.known_modules = known_modules
 
     def get_fields(self, *, ignore_type: bool = False) -> list[Field]:
         return [
@@ -202,16 +208,6 @@ class TSpecProxy:
 
 
 class TStructSpecProxy(TSpecProxy):
-    def __init__(self, module_name: str, thrift_spec, default_spec, known_modules=None):
-        super().__init__(module_name, thrift_spec, default_spec)
-        self.known_modules = known_modules or set()
-
-    def _get_module_for_value(self, value) -> str | None:
-        if value and hasattr(value, "__class__"):
-            module_name = value.__class__.__module__
-            return module_name if module_name in self.known_modules else None
-        return None
-
     def get_fields(self, *, ignore_type: bool = False) -> list[Field]:
         return [
             StructField(
@@ -219,7 +215,7 @@ class TStructSpecProxy(TSpecProxy):
                 type=self._get_python_type(item) if not ignore_type else None,
                 value=(default_value := self._get_default_value(item)),
                 required=item.required,
-                module=self._get_module_for_value(default_value),
+                module=get_module_for_value(default_value, self.known_modules),
             )
             for item in self.thrift_spec
         ]
