@@ -48,13 +48,25 @@ def test_main(capsys, expected_dir, args):
     shutil.rmtree(output_dir)
 
 
-def test_generated_code_is_importable(tmp_path):
-    """Test that generated code can actually be imported and used."""
+@pytest.mark.parametrize(
+    "args",
+    [
+        ["--frozen"],
+        pytest.param(
+            ["--frozen", "--kw-only"],
+            marks=pytest.mark.skipif(
+                sys.version_info < (3, 10), reason="kw_only requires Python 3.10+"
+            ),
+        ),
+    ],
+)
+def test_generated_code_is_importable(tmp_path, args: list[str]):
+    # WHEN
     input_dir = "example/interfaces"
     output_dir = tmp_path / "generated"
 
     # Generate stubs with frozen option (without kw_only)
-    main([input_dir, "--output", str(output_dir), "--frozen"])
+    main([input_dir, "--output", str(output_dir), *args])
 
     # Copy .pyi files to .py files so they can be imported
     for pyi_file in output_dir.glob("*.pyi"):
@@ -82,64 +94,15 @@ print("Success: TodoItem instantiated")
 """
     )
 
-    # Run the test script
+    # WHEN
     result = subprocess.run(
         [sys.executable, str(test_script)], capture_output=True, text=True, check=False
     )
 
+    # THEN
     # Check for NameError specifically
+    assert result.returncode == 0, f"Failed to run generated code: {result.stderr}"
     assert (
         "NameError" not in result.stderr
     ), f"Generated code has undefined names: {result.stderr}"
-    assert result.returncode == 0, f"Failed to run generated code: {result.stderr}"
-    assert "Success" in result.stdout
-
-
-@pytest.mark.skipif(
-    sys.version_info < (3, 10), reason="kw_only requires Python 3.10+"
-)  # pragma: no cover
-def test_generated_code_with_kw_only_is_importable(tmp_path):  # pragma: no cover
-    """Test that generated code with kw_only can actually be imported and used."""
-    input_dir = "example/interfaces"
-    output_dir = tmp_path / "generated"
-
-    # Generate stubs with frozen + kw_only options (the case that had the bug)
-    main([input_dir, "--output", str(output_dir), "--frozen", "--kw-only"])
-
-    # Copy .pyi files to .py files so they can be imported
-    for pyi_file in output_dir.glob("*.pyi"):
-        py_file = pyi_file.with_suffix(".py")
-        py_file.write_text(pyi_file.read_text())
-
-    # Create __init__.py to make it a proper package
-    (output_dir / "__init__.py").write_text("")
-
-    # Create a test script that imports and uses the generated code
-    test_script = tmp_path / "test_import.py"
-    test_script.write_text(
-        """
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent))
-
-# Import the generated package (not individual modules)
-from generated import todo
-
-# Try to instantiate TodoItem with defaults
-# This will raise NameError if the lambda references undefined DateTime
-item = todo.TodoItem()
-print("Success: TodoItem instantiated")
-"""
-    )
-
-    # Run the test script
-    result = subprocess.run(
-        [sys.executable, str(test_script)], capture_output=True, text=True, check=False
-    )
-
-    # Check for NameError specifically
-    assert (
-        "NameError" not in result.stderr
-    ), f"Generated code has undefined names: {result.stderr}"
-    assert result.returncode == 0, f"Failed to run generated code: {result.stderr}"
     assert "Success" in result.stdout
