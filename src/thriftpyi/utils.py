@@ -1,11 +1,13 @@
-from collections.abc import Mapping
-from typing import Any, Collection, List, Tuple, Type
+from __future__ import annotations
+
+from collections.abc import Collection, Mapping
+from typing import Any, cast
 
 from thriftpy2.thrift import TType
 
 
 def guess_type(  # pylint: disable=too-many-branches
-    value, *, known_modules: Collection[str], known_structs: Collection[Type[Any]]
+    value, *, known_modules: Collection[str], known_structs: Collection[type[Any]]
 ) -> str:
     if isinstance(value, (bool, int, float, str, bytes)):
         return type(value).__name__
@@ -41,61 +43,69 @@ def guess_type(  # pylint: disable=too-many-branches
     return "Any"
 
 
-def get_python_type(ttype: int, meta: List) -> str:
+def get_module_for_value(value, known_modules: Collection[str]) -> str | None:
+    if value and hasattr(value, "__class__"):
+        module_name = value.__class__.__module__
+        if module_name in known_modules:
+            return cast(str, module_name)
+    return None
+
+
+def get_python_type(ttype: int, meta: list) -> str:
     return TTYPE_MAP[ttype](meta)
 
 
-def _get_bool(meta: List) -> str:
+def _get_bool(meta: list) -> str:
     del meta
     return "_typedefs.Bool"
 
 
-def _get_double(meta: List) -> str:
+def _get_double(meta: list) -> str:
     del meta
     return "_typedefs.Double"
 
 
-def _get_byte(meta: List) -> str:
+def _get_byte(meta: list) -> str:
     del meta
     return "_typedefs.Byte"
 
 
-def _get_binary(meta: List) -> str:
+def _get_binary(meta: list) -> str:
     del meta
     return "_typedefs.Binary"
 
 
-def _get_i16(meta: List) -> str:
+def _get_i16(meta: list) -> str:
     del meta
     return "_typedefs.I16"
 
 
-def _get_i32(meta: List) -> str:
+def _get_i32(meta: list) -> str:
     if meta and meta[0] is not None:
         return f"{meta[0].__module__}.{meta[0].__name__}"
     return "_typedefs.I32"
 
 
-def _get_i64(meta: List) -> str:
+def _get_i64(meta: list) -> str:
     del meta
     return "_typedefs.I64"
 
 
-def _get_str(meta: List) -> str:
+def _get_str(meta: list) -> str:
     del meta
     return "_typedefs.String"
 
 
-def _get_struct(meta: List) -> str:
+def _get_struct(meta: list) -> str:
     return f"{meta[0].__module__}.{meta[0].__name__}"
 
 
-def _get_list(meta: List) -> str:
+def _get_list(meta: list) -> str:
     subttype, submeta = _unpack_meta(meta)
     return f"List[{get_python_type(subttype, submeta)}]"
 
 
-def _get_map(meta: List) -> str:
+def _get_map(meta: list) -> str:
     key, value = meta[0]
     key_ttype, key_meta = _unpack_meta([key])
     value_ttype, value_meta = _unpack_meta([value])
@@ -104,12 +114,12 @@ def _get_map(meta: List) -> str:
     return f"Dict[{key_pytype}, {value_pytype}]"
 
 
-def _get_set(meta: List) -> str:
+def _get_set(meta: list) -> str:
     subttype, submeta = _unpack_meta(meta)
     return f"Set[{get_python_type(subttype, submeta)}]"
 
 
-def _unpack_meta(meta: List) -> Tuple[int, List]:
+def _unpack_meta(meta: list) -> tuple[int, list]:
     try:
         subttype, submeta = meta[0]
     except TypeError:
