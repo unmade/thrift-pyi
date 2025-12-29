@@ -14,6 +14,8 @@ def guess_type(  # pylint: disable=too-many-branches
 
     if isinstance(value, Mapping):
         type_ = type(value).__name__.capitalize()
+        if not value:
+            return f"{type_}[Any, Any]"
         key_type = guess_type(
             next(iter(value.keys())),
             known_modules=known_modules,
@@ -28,6 +30,8 @@ def guess_type(  # pylint: disable=too-many-branches
 
     if isinstance(value, Collection):
         type_ = type(value).__name__.capitalize()
+        if not value:
+            return f"{type_}[Any]"
         item_type = guess_type(
             next(iter(value)), known_modules=known_modules, known_structs=known_structs
         )

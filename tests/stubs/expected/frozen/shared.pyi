@@ -17,6 +17,9 @@ class LimitOffset:
 INT_CONST_1: int = 1234
 MAP_CONST: Dict[str, str] = {"hello": "world", "goodnight": "moon"}
 INT_CONST_2: int = 1234
+EMPTY_LIST: List[Any] = []
+EMPTY_MAP: Dict[Any, Any] = {}
+EMPTY_SET: Set[Any] = set()
 
 class Service:
     def ping(self) -> _typedefs.String: ...

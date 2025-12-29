@@ -42,6 +42,9 @@ class TestGuessType:
             ({1, 2}, "Set[int]"),
             ([1, 2], "List[int]"),
             ({"1": "2"}, "Dict[str, str]"),
+            ([], "List[Any]"),
+            ({}, "Dict[Any, Any]"),
+            (set(), "Set[Any]"),
         ],
     )
     def test(self, guess_type, value, expected: str):
