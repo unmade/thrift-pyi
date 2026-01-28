@@ -38,6 +38,11 @@ def guess_type(  # pylint: disable=too-many-branches
         class_name: str = value.__class__.__name__
         if module_name in known_modules:
             return f"{module_name}.{class_name}"
+        # thriftpy2 >=0.5.0 adds _thrift suffix to __module__
+        if module_name.endswith("_thrift"):
+            base_name = module_name.removesuffix("_thrift")
+            if base_name in known_modules:
+                return f"{base_name}.{class_name}"
         if type(value) in known_structs:
             return class_name
     return "Any"
@@ -48,6 +53,11 @@ def get_module_for_value(value, known_modules: Collection[str]) -> str | None:
         module_name = value.__class__.__module__
         if module_name in known_modules:
             return cast(str, module_name)
+        # thriftpy2 >=0.5.0 adds _thrift suffix to __module__
+        if module_name.endswith("_thrift"):
+            base_name = module_name.removesuffix("_thrift")
+            if base_name in known_modules:
+                return base_name
     return None
 
 

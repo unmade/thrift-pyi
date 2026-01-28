@@ -31,6 +31,14 @@ def _guess_type():
     return guess_type
 
 
+@pytest.fixture(name="get_module_for_value")
+def _get_module_for_value():
+    # pylint: disable=import-outside-toplevel
+    from thriftpyi.utils import get_module_for_value
+
+    return get_module_for_value
+
+
 class TestGuessType:
     @pytest.mark.parametrize(
         ["value", "expected"],
@@ -46,6 +54,21 @@ class TestGuessType:
     )
     def test(self, guess_type, value, expected: str):
         assert guess_type(value, known_modules=[], known_structs=[]) == expected
+
+    def test_strips_thrift_suffix_from_module(self, guess_type):
+        value = mock.Mock()
+        value.__class__.__module__ = "foo_thrift_thrift"
+        value.__class__.__name__ = "Bar"
+        result = guess_type(value, known_modules=["foo_thrift"], known_structs=[])
+        assert result == "foo_thrift.Bar"
+
+
+class TestGetModuleForValue:
+    def test_strips_thrift_suffix_from_module(self, get_module_for_value):
+        value = mock.Mock()
+        value.__class__.__module__ = "foo_thrift_thrift"
+        result = get_module_for_value(value, known_modules=["foo_thrift"])
+        assert result == "foo_thrift"
 
 
 class TestRegisterBinary:

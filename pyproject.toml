@@ -27,7 +27,7 @@ thriftpyi = "thriftpyi.cli:main"
 python = "^3.9"
 autoflake = "*"
 black = "*"
-thriftpy2 = ">=0.4.2,<0.6.0"
+thriftpy2 = "^0.5.0"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.24"
