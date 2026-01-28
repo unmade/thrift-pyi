@@ -202,11 +202,10 @@ class TSpecProxy:
         start, _, end = pytype.rpartition(f"{self.module_name}.")
         return start + end
 
-    def _strip_thriftpy2_module_suffix(self, pytype: str) -> str:
-        """Strip _thrift suffix from module names in type annotations.
+    def _strip_thriftpy2_suffix(self, pytype: str) -> str:
+        """Strip _thrift suffix from module refs in type string.
 
-        thriftpy2 >=0.5.0 sets __module__ with a "_thrift" suffix for pickle
-        support, but the module's __name__ remains without suffix.
+        Handles thriftpy2 >=0.5.0 which adds _thrift suffix to __module__.
         """
         for module in self.known_modules:
             pytype = pytype.replace(f"{module}_thrift.", f"{module}.")
@@ -215,7 +214,7 @@ class TSpecProxy:
     def _get_python_type(self, item: TSpecItemProxy) -> str:
         pytype = get_python_type(item.ttype, meta=item.meta)
         pytype = self._remove_self_module(pytype)
-        pytype = self._strip_thriftpy2_module_suffix(pytype)
+        pytype = self._strip_thriftpy2_suffix(pytype)
         return pytype
 
     def _get_default_value(self, item: TSpecItemProxy) -> FieldValue:
