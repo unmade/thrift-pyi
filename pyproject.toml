@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "thrift-pyi"
-version = "2.3.0"
+version = "2.3.1"
 description = "This is simple `.pyi` stubs generator from thrift interfaces"
 readme = "README.rst"
 repository = "https://github.com/unmade/thrift-pyi"
@@ -27,7 +27,7 @@ thriftpyi = "thriftpyi.cli:main"
 python = "^3.9"
 autoflake = "*"
 black = "*"
-thriftpy2 = "^0.4.2"
+thriftpy2 = ">=0.4.2,<0.6.0"
 
 [tool.poetry.dev-dependencies]
 tox = "^3.24"
