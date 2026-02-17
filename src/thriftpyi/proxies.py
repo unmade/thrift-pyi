@@ -49,8 +49,24 @@ class TModuleProxy:
             for tstruct in self.tmodule.__thrift_meta__["structs"]
         ]
 
+    def get_structs_and_unions(self) -> list[ModuleItem]:
+        """Return structs and unions in their original thrift definition order."""
+        structs_ids = {id(x) for x in self.tmodule.__thrift_meta__["structs"]}
+        unions_ids = {id(x) for x in self.tmodule.__thrift_meta__.get("unions", [])}
+        result = []
+        for val in vars(self.tmodule).values():
+            if id(val) in structs_ids or id(val) in unions_ids:
+                result.append(self._make_struct(val))
+        return result
+
     def has_structs(self) -> bool:
         return len(self.tmodule.__thrift_meta__["structs"]) > 0
+
+    def has_unions(self) -> bool:
+        return len(self.tmodule.__thrift_meta__.get("unions", [])) > 0
+
+    def has_structs_or_unions(self) -> bool:
+        return self.has_structs() or self.has_unions()
 
     def has_enums(self) -> bool:
         return len(self.tmodule.__thrift_meta__["enums"]) > 0

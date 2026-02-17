@@ -21,7 +21,9 @@ def build(  # pylint: disable=too-many-arguments
             *_make_imports(proxy),
             *_make_exceptions(proxy, strict=strict_fields),
             *_make_enums(proxy),
-            *_make_structs(proxy, strict=strict_fields, frozen=frozen, kw_only=kw_only),
+            *_make_structs_and_unions(
+                proxy, strict=strict_fields, frozen=frozen, kw_only=kw_only
+            ),
             *_make_consts(proxy),
             *_make_service(proxy, is_async, strict=strict_methods),
         ],
@@ -115,7 +117,7 @@ def build_typedefs() -> ast.Module:
 
 def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
     imports = []
-    if proxy.has_structs():
+    if proxy.has_structs_or_unions():
         imports.append(_make_absolute_import("dataclasses", "dataclass, field"))
     if proxy.has_enums():
         imports.append(_make_absolute_import("enum", "IntEnum"))
@@ -173,14 +175,14 @@ def _dataclass_decorator(*, frozen: bool, kw_only: bool) -> ast.expr:
     )
 
 
-def _make_structs(
+def _make_structs_and_unions(
     interface: TModuleProxy, strict: bool, frozen: bool = False, kw_only: bool = False
 ) -> list[ast.ClassDef]:
     return [
         item.with_options(ignore_required=not strict).as_ast(
             decorators=[_dataclass_decorator(frozen=frozen, kw_only=kw_only)]
         )
-        for item in interface.get_structs()
+        for item in interface.get_structs_and_unions()
     ]
 
 

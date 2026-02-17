@@ -38,6 +38,7 @@ def test_main(capsys, expected_dir, args):
         "shared.pyi",
         "todo.pyi",
         "todo_v2.pyi",
+        "unions.pyi",
     ]
 
     # Check that files match expected output
@@ -86,11 +87,18 @@ sys.path.insert(0, str(Path(__file__).parent))
 
 # Import the generated package (not individual modules)
 from generated import todo
+from generated import unions
 
 # Try to instantiate TodoItem with defaults
 # This will raise NameError if the lambda references undefined DateTime
 item = todo.TodoItem()
 print("Success: TodoItem instantiated")
+
+# Test union types are importable and struct references resolve
+u = unions.SimpleUnion()
+e = unions.Envelope()
+t = unions.TimestampedValue()
+print("Success: Union types instantiated")
 """
     )
 
@@ -105,4 +113,5 @@ print("Success: TodoItem instantiated")
     assert (
         "NameError" not in result.stderr
     ), f"Generated code has undefined names: {result.stderr}"
-    assert "Success" in result.stdout
+    assert "Success: TodoItem instantiated" in result.stdout
+    assert "Success: Union types instantiated" in result.stdout
