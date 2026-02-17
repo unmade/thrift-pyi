@@ -1,9 +1,16 @@
 from __future__ import annotations
 
 from collections.abc import Collection, Mapping
-from typing import Any, cast
+from typing import Any
 
 from thriftpy2.thrift import TType
+
+
+def _normalize_module(name: str, known_modules: Collection[str]) -> str:
+    """Normalize module name, stripping thriftpy2 >=0.5.0 _thrift suffix if needed."""
+    if (base := name.removesuffix("_thrift")) in known_modules:
+        return base
+    return name
 
 
 def guess_type(  # pylint: disable=too-many-branches
@@ -34,7 +41,7 @@ def guess_type(  # pylint: disable=too-many-branches
         return f"{type_}[{item_type}]"
 
     if hasattr(value, "__class__"):
-        module_name: str = value.__class__.__module__
+        module_name = _normalize_module(value.__class__.__module__, known_modules)
         class_name: str = value.__class__.__name__
         if module_name in known_modules:
             return f"{module_name}.{class_name}"
@@ -45,9 +52,9 @@ def guess_type(  # pylint: disable=too-many-branches
 
 def get_module_for_value(value, known_modules: Collection[str]) -> str | None:
     if value and hasattr(value, "__class__"):
-        module_name = value.__class__.__module__
+        module_name = _normalize_module(value.__class__.__module__, known_modules)
         if module_name in known_modules:
-            return cast(str, module_name)
+            return module_name
     return None
 
 

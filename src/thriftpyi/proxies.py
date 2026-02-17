@@ -103,8 +103,10 @@ class TModuleProxy:
 
         return ModuleItem(name=texc.__name__, methods=methods, fields=fields)
 
-    @staticmethod
-    def _make_service(tservice) -> ModuleItem:
+    def _make_service(self, tservice) -> ModuleItem:
+        known_modules = {
+            module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
+        }
         return ModuleItem(
             name=tservice.__name__,
             methods=[
@@ -118,6 +120,7 @@ class TModuleProxy:
                         default_spec=dict(
                             getattr(tservice, f"{method_name}_args").default_spec
                         ),
+                        known_modules=known_modules,
                     ).get_fields(),
                     returns=TSpecProxy(
                         module_name=tservice.__module__,
@@ -127,6 +130,7 @@ class TModuleProxy:
                         default_spec=dict(
                             getattr(tservice, f"{method_name}_args").default_spec
                         ),
+                        known_modules=known_modules,
                     ).get_fields(),
                 )
                 for method_name in tservice.thrift_services
@@ -198,9 +202,20 @@ class TSpecProxy:
         start, _, end = pytype.rpartition(f"{self.module_name}.")
         return start + end
 
+    def _strip_thriftpy2_suffix(self, pytype: str) -> str:
+        """Strip _thrift suffix from module refs in type string.
+
+        Handles thriftpy2 >=0.5.0 which adds _thrift suffix to __module__.
+        """
+        for module in self.known_modules:
+            pytype = pytype.replace(f"{module}_thrift.", f"{module}.")
+        return pytype
+
     def _get_python_type(self, item: TSpecItemProxy) -> str:
         pytype = get_python_type(item.ttype, meta=item.meta)
-        return self._remove_self_module(pytype)
+        pytype = self._remove_self_module(pytype)
+        pytype = self._strip_thriftpy2_suffix(pytype)
+        return pytype
 
     def _get_default_value(self, item: TSpecItemProxy) -> FieldValue:
         default_value = self.default_spec.get(item.name)
