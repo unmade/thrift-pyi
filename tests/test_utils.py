@@ -23,6 +23,14 @@ def _register_binary():
     return _register_binary
 
 
+@pytest.fixture(name="normalize_module")
+def _normalize_module():
+    # pylint: disable=import-outside-toplevel
+    from thriftpyi.utils import _normalize_module
+
+    return _normalize_module
+
+
 @pytest.fixture(name="guess_type")
 def _guess_type():
     # pylint: disable=import-outside-toplevel
@@ -62,6 +70,18 @@ class TestGuessType:
         result = guess_type(value, known_modules=["foo_thrift"], known_structs=[])
         assert result == "foo_thrift.Bar"
 
+    def test_resolves_cross_dir_module(self, guess_type):
+        value = mock.Mock()
+        value.__class__.__module__ = "sub.child_thrift"
+        value.__class__.__name__ = "Identifier"
+        result = guess_type(
+            value,
+            known_modules=["child"],
+            known_structs=[],
+            module_name_map={"sub.child_thrift": "child"},
+        )
+        assert result == "child.Identifier"
+
 
 class TestGetModuleForValue:
     def test_strips_thrift_suffix_from_module(self, get_module_for_value):
@@ -69,6 +89,38 @@ class TestGetModuleForValue:
         value.__class__.__module__ = "foo_thrift_thrift"
         result = get_module_for_value(value, known_modules=["foo_thrift"])
         assert result == "foo_thrift"
+
+    def test_resolves_cross_dir_module(self, get_module_for_value):
+        value = mock.Mock()
+        value.__class__.__module__ = "sub.child_thrift"
+        result = get_module_for_value(
+            value,
+            known_modules=["child"],
+            module_name_map={"sub.child_thrift": "child"},
+        )
+        assert result == "child"
+
+
+class TestNormalizeModule:
+    def test_strips_thrift_suffix(self, normalize_module):
+        result = normalize_module("foo_thrift", known_modules=["foo"])
+        assert result == "foo"
+
+    def test_cross_dir_include(self, normalize_module):
+        result = normalize_module(
+            "sub.child_thrift",
+            known_modules=["child"],
+            module_name_map={"sub.child_thrift": "child"},
+        )
+        assert result == "child"
+
+    def test_map_takes_precedence(self, normalize_module):
+        result = normalize_module(
+            "sub.child_thrift",
+            known_modules=["sub.child"],
+            module_name_map={"sub.child_thrift": "child"},
+        )
+        assert result == "child"
 
 
 class TestRegisterBinary:
