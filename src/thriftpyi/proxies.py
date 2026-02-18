@@ -58,10 +58,7 @@ class TModuleProxy:
     def _get_include_info(self) -> tuple[set[str], dict[str, str]]:
         includes = self.tmodule.__thrift_meta__["includes"]
         known_modules = {m.__name__ for m in includes}
-        module_name_map = {
-            getattr(m, "__thrift_module_name__", m.__name__): m.__name__
-            for m in includes
-        }
+        module_name_map = {m.__thrift_module_name__: m.__name__ for m in includes}
         return known_modules, module_name_map
 
     def _make_const(self, tconst) -> Field:
@@ -173,9 +170,15 @@ class TSpecItemProxy:
 
 
 class TSpecProxy:
-    __slots__ = ("module_name", "thrift_spec", "default_spec", "known_modules", "module_name_map")
+    __slots__ = (
+        "module_name",
+        "thrift_spec",
+        "default_spec",
+        "known_modules",
+        "module_name_map",
+    )
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         module_name: str,
         thrift_spec,
