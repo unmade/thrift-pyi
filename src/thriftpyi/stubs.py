@@ -18,6 +18,11 @@ def build(  # pylint: disable=too-many-arguments
 ) -> ast.Module:
     return ast.Module(
         body=[
+            ast.ImportFrom(
+                module="__future__",
+                names=[ast.alias(name="annotations")],
+                level=0,
+            ),
             *_make_imports(proxy),
             *_make_exceptions(proxy, strict=strict_fields),
             *_make_enums(proxy),
