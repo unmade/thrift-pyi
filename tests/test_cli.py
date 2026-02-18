@@ -67,7 +67,9 @@ def test_main(capsys, expected_dir, args):
         (
             "tests/cross_dir_interfaces",
             ["--frozen"],
-            "from generated import parent\nparent.ParentRecord()",
+            "from generated import parent\n"
+            "rec = parent.ParentRecord()\n"
+            "assert rec.default_id.value == 'unknown'",
         ),
     ],
 )
