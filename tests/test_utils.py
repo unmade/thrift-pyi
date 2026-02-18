@@ -63,12 +63,17 @@ class TestGuessType:
     def test(self, guess_type, value, expected: str):
         assert guess_type(value, known_modules=[], known_structs=[]) == expected
 
-    def test_strips_thrift_suffix_from_module(self, guess_type):
+    def test_resolves_module_via_map(self, guess_type):
         value = mock.Mock()
-        value.__class__.__module__ = "foo_thrift_thrift"
+        value.__class__.__module__ = "foo_thrift"
         value.__class__.__name__ = "Bar"
-        result = guess_type(value, known_modules=["foo_thrift"], known_structs=[])
-        assert result == "foo_thrift.Bar"
+        result = guess_type(
+            value,
+            known_modules=["foo"],
+            known_structs=[],
+            module_name_map={"foo_thrift": "foo"},
+        )
+        assert result == "foo.Bar"
 
     def test_resolves_cross_dir_module(self, guess_type):
         value = mock.Mock()
@@ -84,11 +89,15 @@ class TestGuessType:
 
 
 class TestGetModuleForValue:
-    def test_strips_thrift_suffix_from_module(self, get_module_for_value):
+    def test_resolves_module_via_map(self, get_module_for_value):
         value = mock.Mock()
-        value.__class__.__module__ = "foo_thrift_thrift"
-        result = get_module_for_value(value, known_modules=["foo_thrift"])
-        assert result == "foo_thrift"
+        value.__class__.__module__ = "foo_thrift"
+        result = get_module_for_value(
+            value,
+            known_modules=["foo"],
+            module_name_map={"foo_thrift": "foo"},
+        )
+        assert result == "foo"
 
     def test_resolves_cross_dir_module(self, get_module_for_value):
         value = mock.Mock()
@@ -102,25 +111,23 @@ class TestGetModuleForValue:
 
 
 class TestNormalizeModule:
-    def test_strips_thrift_suffix(self, normalize_module):
-        result = normalize_module("foo_thrift", known_modules=["foo"])
+    def test_resolves_via_map(self, normalize_module):
+        result = normalize_module(
+            "foo_thrift",
+            module_name_map={"foo_thrift": "foo"},
+        )
         assert result == "foo"
 
     def test_cross_dir_include(self, normalize_module):
         result = normalize_module(
             "sub.child_thrift",
-            known_modules=["child"],
             module_name_map={"sub.child_thrift": "child"},
         )
         assert result == "child"
 
-    def test_map_takes_precedence(self, normalize_module):
-        result = normalize_module(
-            "sub.child_thrift",
-            known_modules=["sub.child"],
-            module_name_map={"sub.child_thrift": "child"},
-        )
-        assert result == "child"
+    def test_returns_name_unchanged_without_map(self, normalize_module):
+        result = normalize_module("unknown_thrift")
+        assert result == "unknown_thrift"
 
 
 class TestRegisterBinary:

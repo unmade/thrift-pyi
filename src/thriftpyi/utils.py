@@ -6,16 +6,10 @@ from typing import Any
 from thriftpy2.thrift import TType
 
 
-def _normalize_module(
-    name: str,
-    known_modules: Collection[str],
-    module_name_map: dict[str, str] | None = None,
-) -> str:
-    """Normalize module name, stripping thriftpy2 >=0.5.0 _thrift suffix if needed."""
+def _normalize_module(name: str, module_name_map: dict[str, str] | None = None) -> str:
+    """Normalize a thriftpy2 module name to its short include name."""
     if module_name_map and name in module_name_map:
         return module_name_map[name]
-    if (base := name.removesuffix("_thrift")) in known_modules:
-        return base
     return name
 
 
@@ -56,9 +50,7 @@ def guess_type(  # pylint: disable=too-many-branches
         return f"{type_}[{item_type}]"
 
     if hasattr(value, "__class__"):
-        module_name = _normalize_module(
-            value.__class__.__module__, known_modules, module_name_map
-        )
+        module_name = _normalize_module(value.__class__.__module__, module_name_map)
         class_name: str = value.__class__.__name__
         if module_name in known_modules:
             return f"{module_name}.{class_name}"
@@ -73,9 +65,7 @@ def get_module_for_value(
     module_name_map: dict[str, str] | None = None,
 ) -> str | None:
     if value and hasattr(value, "__class__"):
-        module_name = _normalize_module(
-            value.__class__.__module__, known_modules, module_name_map
-        )
+        module_name = _normalize_module(value.__class__.__module__, module_name_map)
         if module_name in known_modules:
             return module_name
     return None
