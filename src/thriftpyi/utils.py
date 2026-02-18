@@ -6,19 +6,11 @@ from typing import Any
 from thriftpy2.thrift import TType
 
 
-def _normalize_module(name: str, module_name_map: dict[str, str] | None = None) -> str:
-    """Normalize a thriftpy2 module name to its short include name."""
-    if module_name_map and name in module_name_map:
-        return module_name_map[name]
-    return name
-
-
 def guess_type(  # pylint: disable=too-many-branches
     value,
     *,
-    known_modules: Collection[str],
+    module_name_map: dict[str, str],
     known_structs: Collection[type[Any]],
-    module_name_map: dict[str, str] | None = None,
 ) -> str:
     if isinstance(value, (bool, int, float, str, bytes)):
         return type(value).__name__
@@ -27,15 +19,13 @@ def guess_type(  # pylint: disable=too-many-branches
         type_ = type(value).__name__.capitalize()
         key_type = guess_type(
             next(iter(value.keys())),
-            known_modules=known_modules,
-            known_structs=known_structs,
             module_name_map=module_name_map,
+            known_structs=known_structs,
         )
         value_type = guess_type(
             next(iter(value.values())),
-            known_modules=known_modules,
-            known_structs=known_structs,
             module_name_map=module_name_map,
+            known_structs=known_structs,
         )
         return f"{type_}[{key_type}, {value_type}]"
 
@@ -43,31 +33,26 @@ def guess_type(  # pylint: disable=too-many-branches
         type_ = type(value).__name__.capitalize()
         item_type = guess_type(
             next(iter(value)),
-            known_modules=known_modules,
-            known_structs=known_structs,
             module_name_map=module_name_map,
+            known_structs=known_structs,
         )
         return f"{type_}[{item_type}]"
 
     if hasattr(value, "__class__"):
-        module_name = _normalize_module(value.__class__.__module__, module_name_map)
+        raw_module = value.__class__.__module__
         class_name: str = value.__class__.__name__
-        if module_name in known_modules:
-            return f"{module_name}.{class_name}"
+        if raw_module in module_name_map:
+            return f"{module_name_map[raw_module]}.{class_name}"
         if type(value) in known_structs:
             return class_name
     return "Any"
 
 
-def get_module_for_value(
-    value,
-    known_modules: Collection[str],
-    module_name_map: dict[str, str] | None = None,
-) -> str | None:
+def get_module_for_value(value, module_name_map: dict[str, str]) -> str | None:
     if value and hasattr(value, "__class__"):
-        module_name = _normalize_module(value.__class__.__module__, module_name_map)
-        if module_name in known_modules:
-            return module_name
+        raw_module = value.__class__.__module__
+        if raw_module in module_name_map:
+            return module_name_map[raw_module]
     return None
 
 
