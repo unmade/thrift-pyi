@@ -23,14 +23,6 @@ def _register_binary():
     return _register_binary
 
 
-@pytest.fixture(name="normalize_module")
-def _normalize_module():
-    # pylint: disable=import-outside-toplevel
-    from thriftpyi.utils import _normalize_module
-
-    return _normalize_module
-
-
 @pytest.fixture(name="guess_type")
 def _guess_type():
     # pylint: disable=import-outside-toplevel
@@ -61,7 +53,7 @@ class TestGuessType:
         ],
     )
     def test(self, guess_type, value, expected: str):
-        assert guess_type(value, known_modules=[], known_structs=[]) == expected
+        assert guess_type(value, module_name_map={}, known_structs=[]) == expected
 
     def test_resolves_module_via_map(self, guess_type):
         value = mock.Mock()
@@ -69,9 +61,8 @@ class TestGuessType:
         value.__class__.__name__ = "Bar"
         result = guess_type(
             value,
-            known_modules=["foo"],
-            known_structs=[],
             module_name_map={"foo_thrift": "foo"},
+            known_structs=[],
         )
         assert result == "foo.Bar"
 
@@ -81,9 +72,8 @@ class TestGuessType:
         value.__class__.__name__ = "Identifier"
         result = guess_type(
             value,
-            known_modules=["child"],
-            known_structs=[],
             module_name_map={"sub.child_thrift": "child"},
+            known_structs=[],
         )
         assert result == "child.Identifier"
 
@@ -94,7 +84,6 @@ class TestGetModuleForValue:
         value.__class__.__module__ = "foo_thrift"
         result = get_module_for_value(
             value,
-            known_modules=["foo"],
             module_name_map={"foo_thrift": "foo"},
         )
         assert result == "foo"
@@ -104,30 +93,15 @@ class TestGetModuleForValue:
         value.__class__.__module__ = "sub.child_thrift"
         result = get_module_for_value(
             value,
-            known_modules=["child"],
             module_name_map={"sub.child_thrift": "child"},
         )
         assert result == "child"
 
-
-class TestNormalizeModule:
-    def test_resolves_via_map(self, normalize_module):
-        result = normalize_module(
-            "foo_thrift",
-            module_name_map={"foo_thrift": "foo"},
-        )
-        assert result == "foo"
-
-    def test_cross_dir_include(self, normalize_module):
-        result = normalize_module(
-            "sub.child_thrift",
-            module_name_map={"sub.child_thrift": "child"},
-        )
-        assert result == "child"
-
-    def test_returns_name_unchanged_without_map(self, normalize_module):
-        result = normalize_module("unknown_thrift")
-        assert result == "unknown_thrift"
+    def test_returns_none_for_unknown_module(self, get_module_for_value):
+        value = mock.Mock()
+        value.__class__.__module__ = "unknown_thrift"
+        result = get_module_for_value(value, module_name_map={"foo_thrift": "foo"})
+        assert result is None
 
 
 class TestRegisterBinary:
