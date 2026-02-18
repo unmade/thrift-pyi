@@ -6,15 +6,25 @@ from typing import Any
 from thriftpy2.thrift import TType
 
 
-def _normalize_module(name: str, known_modules: Collection[str]) -> str:
+def _normalize_module(
+    name: str,
+    known_modules: Collection[str],
+    module_name_map: dict[str, str] | None = None,
+) -> str:
     """Normalize module name, stripping thriftpy2 >=0.5.0 _thrift suffix if needed."""
+    if module_name_map and name in module_name_map:
+        return module_name_map[name]
     if (base := name.removesuffix("_thrift")) in known_modules:
         return base
     return name
 
 
 def guess_type(  # pylint: disable=too-many-branches
-    value, *, known_modules: Collection[str], known_structs: Collection[type[Any]]
+    value,
+    *,
+    known_modules: Collection[str],
+    known_structs: Collection[type[Any]],
+    module_name_map: dict[str, str] | None = None,
 ) -> str:
     if isinstance(value, (bool, int, float, str, bytes)):
         return type(value).__name__
@@ -25,23 +35,30 @@ def guess_type(  # pylint: disable=too-many-branches
             next(iter(value.keys())),
             known_modules=known_modules,
             known_structs=known_structs,
+            module_name_map=module_name_map,
         )
         value_type = guess_type(
             next(iter(value.values())),
             known_modules=known_modules,
             known_structs=known_structs,
+            module_name_map=module_name_map,
         )
         return f"{type_}[{key_type}, {value_type}]"
 
     if isinstance(value, Collection):
         type_ = type(value).__name__.capitalize()
         item_type = guess_type(
-            next(iter(value)), known_modules=known_modules, known_structs=known_structs
+            next(iter(value)),
+            known_modules=known_modules,
+            known_structs=known_structs,
+            module_name_map=module_name_map,
         )
         return f"{type_}[{item_type}]"
 
     if hasattr(value, "__class__"):
-        module_name = _normalize_module(value.__class__.__module__, known_modules)
+        module_name = _normalize_module(
+            value.__class__.__module__, known_modules, module_name_map
+        )
         class_name: str = value.__class__.__name__
         if module_name in known_modules:
             return f"{module_name}.{class_name}"
@@ -50,9 +67,15 @@ def guess_type(  # pylint: disable=too-many-branches
     return "Any"
 
 
-def get_module_for_value(value, known_modules: Collection[str]) -> str | None:
+def get_module_for_value(
+    value,
+    known_modules: Collection[str],
+    module_name_map: dict[str, str] | None = None,
+) -> str | None:
     if value and hasattr(value, "__class__"):
-        module_name = _normalize_module(value.__class__.__module__, known_modules)
+        module_name = _normalize_module(
+            value.__class__.__module__, known_modules, module_name_map
+        )
         if module_name in known_modules:
             return module_name
     return None

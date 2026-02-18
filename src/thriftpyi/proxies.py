@@ -55,14 +55,21 @@ class TModuleProxy:
     def has_enums(self) -> bool:
         return len(self.tmodule.__thrift_meta__["enums"]) > 0
 
+    def _get_include_info(self) -> tuple[set[str], dict[str, str]]:
+        includes = self.tmodule.__thrift_meta__["includes"]
+        known_modules = {m.__name__ for m in includes}
+        module_name_map = {
+            getattr(m, "__thrift_module_name__", m.__name__): m.__name__
+            for m in includes
+        }
+        return known_modules, module_name_map
+
     def _make_const(self, tconst) -> Field:
         name, value = tconst
 
-        known_modules = {
-            module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
-        }
+        known_modules, module_name_map = self._get_include_info()
 
-        module_name = get_module_for_value(value, known_modules)
+        module_name = get_module_for_value(value, known_modules, module_name_map)
 
         return Field(
             name=name,
@@ -70,6 +77,7 @@ class TModuleProxy:
                 value,
                 known_modules=known_modules,
                 known_structs=self.tmodule.__thrift_meta__["structs"],
+                module_name_map=module_name_map,
             ),
             value=value,
             module=module_name,
@@ -88,12 +96,13 @@ class TModuleProxy:
         )
         return ModuleItem(name=tenum.__name__, fields=spec.get_fields(ignore_type=True))
 
-    @staticmethod
-    def _make_exception(texc) -> ModuleItem:
+    def _make_exception(self, texc) -> ModuleItem:
+        _known_modules, module_name_map = self._get_include_info()
         spec = TSpecProxy(
             module_name=texc.__module__,
             thrift_spec=texc.thrift_spec,
             default_spec=dict(texc.default_spec),
+            module_name_map=module_name_map,
         )
 
         fields = spec.get_fields()
@@ -104,9 +113,7 @@ class TModuleProxy:
         return ModuleItem(name=texc.__name__, methods=methods, fields=fields)
 
     def _make_service(self, tservice) -> ModuleItem:
-        known_modules = {
-            module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
-        }
+        known_modules, module_name_map = self._get_include_info()
         return ModuleItem(
             name=tservice.__name__,
             methods=[
@@ -121,6 +128,7 @@ class TModuleProxy:
                             getattr(tservice, f"{method_name}_args").default_spec
                         ),
                         known_modules=known_modules,
+                        module_name_map=module_name_map,
                     ).get_fields(),
                     returns=TSpecProxy(
                         module_name=tservice.__module__,
@@ -131,6 +139,7 @@ class TModuleProxy:
                             getattr(tservice, f"{method_name}_args").default_spec
                         ),
                         known_modules=known_modules,
+                        module_name_map=module_name_map,
                     ).get_fields(),
                 )
                 for method_name in tservice.thrift_services
@@ -138,13 +147,13 @@ class TModuleProxy:
         )
 
     def _make_struct(self, tclass) -> ModuleItem:
+        known_modules, module_name_map = self._get_include_info()
         spec = TStructSpecProxy(
             module_name=tclass.__module__,
             thrift_spec=tclass.thrift_spec,
             default_spec=dict(tclass.default_spec),
-            known_modules={
-                module.__name__ for module in self.tmodule.__thrift_meta__["includes"]
-            },
+            known_modules=known_modules,
+            module_name_map=module_name_map,
         )
         return ModuleItem(
             name=tclass.__name__,
@@ -164,7 +173,7 @@ class TSpecItemProxy:
 
 
 class TSpecProxy:
-    __slots__ = ("module_name", "thrift_spec", "default_spec", "known_modules")
+    __slots__ = ("module_name", "thrift_spec", "default_spec", "known_modules", "module_name_map")
 
     def __init__(
         self,
@@ -172,11 +181,13 @@ class TSpecProxy:
         thrift_spec,
         default_spec,
         known_modules: Collection[str] = (),
+        module_name_map: dict[str, str] | None = None,
     ) -> None:
         self.module_name = module_name
         self.thrift_spec = [TSpecItemProxy(thrift_spec[k]) for k in sorted(thrift_spec)]
         self.default_spec = default_spec
         self.known_modules = known_modules
+        self.module_name_map = module_name_map or {}
 
     def get_fields(self, *, ignore_type: bool = False) -> list[Field]:
         return [
@@ -206,9 +217,10 @@ class TSpecProxy:
         """Strip _thrift suffix from module refs in type string.
 
         Handles thriftpy2 >=0.5.0 which adds _thrift suffix to __module__.
+        Also handles cross-directory includes where __module__ contains a path prefix.
         """
-        for module in self.known_modules:
-            pytype = pytype.replace(f"{module}_thrift.", f"{module}.")
+        for thrift_name, base_name in self.module_name_map.items():
+            pytype = pytype.replace(f"{thrift_name}.", f"{base_name}.")
         return pytype
 
     def _get_python_type(self, item: TSpecItemProxy) -> str:
@@ -230,7 +242,9 @@ class TStructSpecProxy(TSpecProxy):
                 type=self._get_python_type(item) if not ignore_type else None,
                 value=(default_value := self._get_default_value(item)),
                 required=item.required,
-                module=get_module_for_value(default_value, self.known_modules),
+                module=get_module_for_value(
+                    default_value, self.known_modules, self.module_name_map
+                ),
             )
             for item in self.thrift_spec
         ]
