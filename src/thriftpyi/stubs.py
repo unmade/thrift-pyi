@@ -18,11 +18,6 @@ def build(  # pylint: disable=too-many-arguments
 ) -> ast.Module:
     return ast.Module(
         body=[
-            ast.ImportFrom(
-                module="__future__",
-                names=[ast.alias(name="annotations")],
-                level=0,
-            ),
             *_make_imports(proxy),
             *_make_exceptions(proxy, strict=strict_fields),
             *_make_enums(proxy),
@@ -119,7 +114,8 @@ def build_typedefs() -> ast.Module:
 
 
 def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
-    imports = []
+    imports = [_make_absolute_import("__future__", "annotations")]
+
     if proxy.has_structs():
         imports.append(_make_absolute_import("dataclasses", "dataclass, field"))
     if proxy.has_enums():
