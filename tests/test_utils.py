@@ -53,22 +53,55 @@ class TestGuessType:
         ],
     )
     def test(self, guess_type, value, expected: str):
-        assert guess_type(value, known_modules=[], known_structs=[]) == expected
+        assert guess_type(value, module_name_map={}, known_structs=[]) == expected
 
-    def test_strips_thrift_suffix_from_module(self, guess_type):
+    def test_resolves_module_via_map(self, guess_type):
         value = mock.Mock()
-        value.__class__.__module__ = "foo_thrift_thrift"
+        value.__class__.__module__ = "foo_thrift"
         value.__class__.__name__ = "Bar"
-        result = guess_type(value, known_modules=["foo_thrift"], known_structs=[])
-        assert result == "foo_thrift.Bar"
+        result = guess_type(
+            value,
+            module_name_map={"foo_thrift": "foo"},
+            known_structs=[],
+        )
+        assert result == "foo.Bar"
+
+    def test_resolves_cross_dir_module(self, guess_type):
+        value = mock.Mock()
+        value.__class__.__module__ = "sub.child_thrift"
+        value.__class__.__name__ = "Identifier"
+        result = guess_type(
+            value,
+            module_name_map={"sub.child_thrift": "child"},
+            known_structs=[],
+        )
+        assert result == "child.Identifier"
 
 
 class TestGetModuleForValue:
-    def test_strips_thrift_suffix_from_module(self, get_module_for_value):
+    def test_resolves_module_via_map(self, get_module_for_value):
         value = mock.Mock()
-        value.__class__.__module__ = "foo_thrift_thrift"
-        result = get_module_for_value(value, known_modules=["foo_thrift"])
-        assert result == "foo_thrift"
+        value.__class__.__module__ = "foo_thrift"
+        result = get_module_for_value(
+            value,
+            module_name_map={"foo_thrift": "foo"},
+        )
+        assert result == "foo"
+
+    def test_resolves_cross_dir_module(self, get_module_for_value):
+        value = mock.Mock()
+        value.__class__.__module__ = "sub.child_thrift"
+        result = get_module_for_value(
+            value,
+            module_name_map={"sub.child_thrift": "child"},
+        )
+        assert result == "child"
+
+    def test_returns_none_for_unknown_module(self, get_module_for_value):
+        value = mock.Mock()
+        value.__class__.__module__ = "unknown_thrift"
+        result = get_module_for_value(value, module_name_map={"foo_thrift": "foo"})
+        assert result is None
 
 
 class TestRegisterBinary:
