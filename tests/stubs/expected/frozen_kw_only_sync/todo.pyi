@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 from enum import IntEnum
 from typing import *
@@ -31,6 +32,15 @@ class TodoCounter:
     plain_ids: Set[_typedefs.I32] = field(default_factory=lambda: {1, 2, 3})
     note_ids: List[_typedefs.I32] = field(default_factory=list)
     checkboxes_ids: Set[_typedefs.I32] = field(default_factory=set)
+
+@dataclass(frozen=True, kw_only=True)
+class TodoComment:
+    text: _typedefs.String
+    thread: Optional[TodoCommentThread] = None
+
+@dataclass(frozen=True, kw_only=True)
+class TodoCommentThread:
+    comments: List[TodoComment]
 
 default_created_date: dates.DateTime = dates.DateTime(
     year=2024, month=12, day=25, hour=0, minute=0, second=0, microsecond=0

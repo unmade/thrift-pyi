@@ -45,6 +45,16 @@ struct TodoCounter {
 }
 
 
+struct TodoComment {
+    1: required string text
+    2: optional TodoCommentThread thread
+}
+
+struct TodoCommentThread {
+    1: required list<TodoComment> comments
+}
+
+
 service Todo extends shared.Service {
     i32 create(
         1: string text,

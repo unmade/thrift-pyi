@@ -114,7 +114,8 @@ def build_typedefs() -> ast.Module:
 
 
 def _make_imports(proxy: TModuleProxy) -> list[ast.ImportFrom]:
-    imports = []
+    imports = [_make_absolute_import("__future__", "annotations")]
+
     if proxy.has_structs():
         imports.append(_make_absolute_import("dataclasses", "dataclass, field"))
     if proxy.has_enums():
