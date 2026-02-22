@@ -32,7 +32,9 @@ class TodoItem:
         )
     )
     is_favorite: _typedefs.Bool = False
-    labels: List[labels.Label]
+    labels: List[labels.Label] = field(
+        default_factory=lambda: [labels.Label(name="default", color=3)]
+    )
 
 @dataclass(frozen=True, kw_only=True)
 class TodoCounter:

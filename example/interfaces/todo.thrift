@@ -39,7 +39,7 @@ struct TodoItem {
     6: optional binary picture
     7: required dates.DateTime createdWithDefault = dates.EPOCH
     8: required bool is_favorite = false
-    9: required list<labels.Label> labels
+    9: required list<labels.Label> labels = [labels.DEFAULT_LABEL]
 }
 
 

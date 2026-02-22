@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import cast
 
 from thriftpyi.entities import Field, FieldValue, Method, ModuleItem, StructField
-from thriftpyi.utils import get_module_for_value, get_python_type, guess_type
+from thriftpyi.utils import get_python_type, guess_type, patch_value_repr
 
 
 class TModuleProxy:
@@ -61,6 +61,7 @@ class TModuleProxy:
     def _make_const(self, tconst) -> Field:
         name, value = tconst
         module_name_map = self._get_module_name_map()
+        patch_value_repr(value, module_name_map)
 
         return Field(
             name=name,
@@ -70,7 +71,6 @@ class TModuleProxy:
                 known_structs=self.tmodule.__thrift_meta__["structs"],
             ),
             value=value,
-            module=get_module_for_value(value, module_name_map),
             required=True,
         )
 
@@ -223,9 +223,11 @@ class TStructSpecProxy(TSpecProxy):
             StructField(
                 name=item.name,
                 type=self._get_python_type(item) if not ignore_type else None,
-                value=(default_value := self._get_default_value(item)),
+                value=patch_value_repr(
+                    self._get_default_value(item),
+                    module_name_map=self.module_name_map,
+                ),
                 required=item.required,
-                module=get_module_for_value(default_value, self.module_name_map),
             )
             for item in self.thrift_spec
         ]

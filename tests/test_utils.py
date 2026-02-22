@@ -31,14 +31,6 @@ def _guess_type():
     return guess_type
 
 
-@pytest.fixture(name="get_module_for_value")
-def _get_module_for_value():
-    # pylint: disable=import-outside-toplevel
-    from thriftpyi.utils import get_module_for_value
-
-    return get_module_for_value
-
-
 class TestGuessType:
     @pytest.mark.parametrize(
         ["value", "expected"],
@@ -76,32 +68,6 @@ class TestGuessType:
             known_structs=[],
         )
         assert result == "child.Identifier"
-
-
-class TestGetModuleForValue:
-    def test_resolves_module_via_map(self, get_module_for_value):
-        value = mock.Mock()
-        value.__class__.__module__ = "foo_thrift"
-        result = get_module_for_value(
-            value,
-            module_name_map={"foo_thrift": "foo"},
-        )
-        assert result == "foo"
-
-    def test_resolves_cross_dir_module(self, get_module_for_value):
-        value = mock.Mock()
-        value.__class__.__module__ = "sub.child_thrift"
-        result = get_module_for_value(
-            value,
-            module_name_map={"sub.child_thrift": "child"},
-        )
-        assert result == "child"
-
-    def test_returns_none_for_unknown_module(self, get_module_for_value):
-        value = mock.Mock()
-        value.__class__.__module__ = "unknown_thrift"
-        result = get_module_for_value(value, module_name_map={"foo_thrift": "foo"})
-        assert result is None
 
 
 class TestRegisterBinary:

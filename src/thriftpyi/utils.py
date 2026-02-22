@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import functools
 from collections.abc import Collection, Mapping
 from typing import Any
 
@@ -48,12 +49,58 @@ def guess_type(  # pylint: disable=too-many-branches
     return "Any"
 
 
-def get_module_for_value(value, module_name_map: dict[str, str]) -> str | None:
+def patch_value_repr(  # pylint: disable=too-many-branches
+    value, module_name_map: dict[str, str]
+) -> Any:
+    """
+    Patches value representation and adds `module` when applicable.
+
+    This particularly useful for defaults values that uses structs from other modules.
+    By default, `thrifpy2` does not include the module name in the default value.
+
+    >>> value
+    [Label(name='default', color=3)]
+    >>> patch_value_repr(value, module_name_map={'common.labels_thrift': 'labels'})
+    >>> value
+    [labels.Label(name='default', color=3)]
+
+    """
+    if isinstance(value, (bool, int, float, str, bytes, type(None))):
+        return value
+
+    if isinstance(value, Collection):
+        for x in value:
+            patch_value_repr(x, module_name_map=module_name_map)
+        return value
+
+    if isinstance(value, Mapping):
+        for x in value.values():
+            patch_value_repr(x, module_name_map=module_name_map)
+        return value
+
     if value and hasattr(value, "__class__"):
-        raw_module = value.__class__.__module__
-        if raw_module in module_name_map:
-            return module_name_map[raw_module]
-    return None
+        cls = value.__class__
+        raw_module = cls.__module__
+        if module := module_name_map.get(raw_module):
+            if not hasattr(cls.__repr__, "_patched"):
+                cls.__repr__ = _repr_with_module(module)(cls.__repr__)
+
+    return value
+
+
+def _repr_with_module(module_name: str):
+    def deco(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            if not result.startswith(f"{module_name}."):
+                return f"{module_name}.{result}"
+            return result
+
+        setattr(wrapper, "_patched", True)
+        return wrapper
+
+    return deco
 
 
 def get_python_type(ttype: int, meta: list) -> str:
