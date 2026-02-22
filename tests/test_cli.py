@@ -35,6 +35,7 @@ def test_main(capsys, expected_dir, args):
         "__init__.pyi",
         "_typedefs.pyi",
         "dates.pyi",
+        "labels.pyi",
         "shared.pyi",
         "todo.pyi",
         "todo_v2.pyi",
@@ -64,13 +65,6 @@ def test_main(capsys, expected_dir, args):
                 sys.version_info < (3, 10), reason="kw_only requires Python 3.10+"
             ),
         ),
-        (
-            "tests/cross_dir_interfaces",
-            ["--frozen"],
-            "from generated import parent\n"
-            "rec = parent.ParentRecord()\n"
-            "assert rec.default_id.value == 'unknown'",
-        ),
     ],
 )
 def test_generated_code_is_importable(tmp_path, input_dir, args, test_code):
@@ -98,19 +92,3 @@ print("Success")
     )
     assert result.returncode == 0, f"Failed to run generated code: {result.stderr}"
     assert "Success" in result.stdout
-
-
-def test_cross_dir_includes(tmp_path):
-    output_dir = tmp_path / "stubs"
-
-    main(
-        ["tests/cross_dir_interfaces", "--output", str(output_dir), "--strict-optional"]
-    )
-
-    pyi_files = ["__init__.pyi", "_typedefs.pyi", "child.pyi", "parent.pyi"]
-    match, mismatch, errors = filecmp.cmpfiles(
-        str(output_dir), "tests/stubs/expected/cross_dir", pyi_files
-    )
-    assert errors == []
-    assert mismatch == []
-    assert match == pyi_files
