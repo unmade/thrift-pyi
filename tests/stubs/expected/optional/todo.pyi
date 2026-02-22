@@ -16,7 +16,7 @@ class TodoType(IntEnum):
 class TodoLabel:
     todo_id: Optional[_typedefs.I32] = None
     name: Optional[_typedefs.String] = None
-    color: Optional[labels.LabelColor] = 3
+    color: Optional[labels.LabelColor] = None
 
 @dataclass
 class TodoItem:

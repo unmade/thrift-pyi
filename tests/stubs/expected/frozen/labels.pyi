@@ -12,6 +12,6 @@ class LabelColor(IntEnum):
 @dataclass(frozen=True)
 class Label:
     name: Optional[_typedefs.String] = None
-    color: Optional[LabelColor] = None
+    color: Optional[_typedefs.I32] = None
 
 DEFAULT_LABEL: Label = Label(name="default", color=3)

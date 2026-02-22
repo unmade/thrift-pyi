@@ -26,7 +26,7 @@ enum TodoType {
 struct TodoLabel {
     1: required i32 todo_id
     2: required string name
-    3: required labels.LabelColor color = labels.LabelColor.BLUE
+    3: required labels.LabelColor color
 }
 
 

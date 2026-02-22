@@ -6,7 +6,7 @@ enum LabelColor {
 
 struct Label {
     1: required string name
-    2: required LabelColor color
+    2: required i32 color
 }
 
 const Label DEFAULT_LABEL = {"name": "default", "color": LabelColor.BLUE }

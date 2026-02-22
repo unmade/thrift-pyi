@@ -11,6 +11,6 @@ class LabelColor(IntEnum):
 @dataclass(frozen=True, kw_only=True)
 class Label:
     name: _typedefs.String
-    color: LabelColor
+    color: _typedefs.I32
 
 DEFAULT_LABEL: Label = Label(name="default", color=3)

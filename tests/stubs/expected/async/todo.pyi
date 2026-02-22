@@ -16,7 +16,7 @@ class TodoType(IntEnum):
 class TodoLabel:
     todo_id: _typedefs.I32
     name: _typedefs.String
-    color: labels.LabelColor = 3
+    color: labels.LabelColor
 
 @dataclass
 class TodoItem:
