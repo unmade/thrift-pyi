@@ -1,20 +1,17 @@
 from __future__ import annotations
 
+import functools
 from collections.abc import Collection, Mapping
 from typing import Any
 
 from thriftpy2.thrift import TType
 
 
-def _normalize_module(name: str, known_modules: Collection[str]) -> str:
-    """Normalize module name, stripping thriftpy2 >=0.5.0 _thrift suffix if needed."""
-    if (base := name.removesuffix("_thrift")) in known_modules:
-        return base
-    return name
-
-
 def guess_type(  # pylint: disable=too-many-branches
-    value, *, known_modules: Collection[str], known_structs: Collection[type[Any]]
+    value,
+    *,
+    module_name_map: dict[str, str],
+    known_structs: Collection[type[Any]],
 ) -> str:
     if isinstance(value, (bool, int, float, str, bytes)):
         return type(value).__name__
@@ -23,12 +20,12 @@ def guess_type(  # pylint: disable=too-many-branches
         type_ = type(value).__name__.capitalize()
         key_type = guess_type(
             next(iter(value.keys())),
-            known_modules=known_modules,
+            module_name_map=module_name_map,
             known_structs=known_structs,
         )
         value_type = guess_type(
             next(iter(value.values())),
-            known_modules=known_modules,
+            module_name_map=module_name_map,
             known_structs=known_structs,
         )
         return f"{type_}[{key_type}, {value_type}]"
@@ -36,26 +33,74 @@ def guess_type(  # pylint: disable=too-many-branches
     if isinstance(value, Collection):
         type_ = type(value).__name__.capitalize()
         item_type = guess_type(
-            next(iter(value)), known_modules=known_modules, known_structs=known_structs
+            next(iter(value)),
+            module_name_map=module_name_map,
+            known_structs=known_structs,
         )
         return f"{type_}[{item_type}]"
 
     if hasattr(value, "__class__"):
-        module_name = _normalize_module(value.__class__.__module__, known_modules)
+        raw_module = value.__class__.__module__
         class_name: str = value.__class__.__name__
-        if module_name in known_modules:
-            return f"{module_name}.{class_name}"
+        if raw_module in module_name_map:
+            return f"{module_name_map[raw_module]}.{class_name}"
         if type(value) in known_structs:
             return class_name
     return "Any"
 
 
-def get_module_for_value(value, known_modules: Collection[str]) -> str | None:
+def patch_value_repr(  # pylint: disable=too-many-branches
+    value, module_name_map: dict[str, str]
+) -> Any:
+    """
+    Patches value representation and adds `module` when applicable.
+
+    This particularly useful for defaults values that uses structs from other modules.
+    By default, `thrifpy2` does not include the module name in the default value.
+
+    >>> value
+    [Label(name='default', color=3)]
+    >>> patch_value_repr(value, module_name_map={'common.labels_thrift': 'labels'})
+    >>> value
+    [labels.Label(name='default', color=3)]
+
+    """
+    if isinstance(value, (bool, int, float, str, bytes, type(None))):
+        return value
+
+    if isinstance(value, Collection):
+        for x in value:
+            patch_value_repr(x, module_name_map=module_name_map)
+        return value
+
+    if isinstance(value, Mapping):
+        for x in value.values():
+            patch_value_repr(x, module_name_map=module_name_map)
+        return value
+
     if value and hasattr(value, "__class__"):
-        module_name = _normalize_module(value.__class__.__module__, known_modules)
-        if module_name in known_modules:
-            return module_name
-    return None
+        cls = value.__class__
+        raw_module = cls.__module__
+        if module := module_name_map.get(raw_module):
+            if not hasattr(cls.__repr__, "_patched"):
+                cls.__repr__ = _repr_with_module(module)(cls.__repr__)
+
+    return value
+
+
+def _repr_with_module(module_name: str):
+    def deco(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            result = func(*args, **kwargs)
+            if not result.startswith(f"{module_name}."):
+                return f"{module_name}.{result}"
+            return result
+
+        setattr(wrapper, "_patched", True)
+        return wrapper
+
+    return deco
 
 
 def get_python_type(ttype: int, meta: list) -> str:

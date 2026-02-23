@@ -2,6 +2,7 @@ namespace * todo
 
 include "shared.thrift"
 include "dates.thrift"
+include "common/labels.thrift"
 
 
 const dates.DateTime default_created_date = {
@@ -22,6 +23,13 @@ enum TodoType {
 }
 
 
+struct TodoLabel {
+    1: required i32 todo_id
+    2: required string name
+    3: required labels.LabelColor color
+}
+
+
 struct TodoItem {
     1: required i32 id
     2: required string text
@@ -31,6 +39,7 @@ struct TodoItem {
     6: optional binary picture
     7: required dates.DateTime createdWithDefault = dates.EPOCH
     8: required bool is_favorite = false
+    9: required list<labels.Label> labels = [labels.DEFAULT_LABEL]
 }
 
 
@@ -89,5 +98,13 @@ service Todo extends shared.Service {
 
     map<TodoType, TodoItemList> groupby(
 
+    )
+
+    TodoLabel set_label(
+        1: i32 todo_id,
+        2: labels.Label label,
+        3: labels.LabelColor color
+    ) throws (
+        1: shared.NotFound not_found,
     )
 }

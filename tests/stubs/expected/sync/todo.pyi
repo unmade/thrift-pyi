@@ -4,12 +4,19 @@ from enum import IntEnum
 from typing import *
 from . import _typedefs
 from . import dates
+from . import labels
 from . import shared
 
 class TodoType(IntEnum):
     PLAIN = 1
     NOTE = 2
     CHECKBOXES = 3
+
+@dataclass
+class TodoLabel:
+    todo_id: _typedefs.I32
+    name: _typedefs.String
+    color: labels.LabelColor
 
 @dataclass
 class TodoItem:
@@ -25,6 +32,9 @@ class TodoItem:
         )
     )
     is_favorite: _typedefs.Bool = False
+    labels: List[labels.Label] = field(
+        default_factory=lambda: [labels.Label(name="default", color=3)]
+    )
 
 @dataclass
 class TodoCounter:
@@ -55,4 +65,7 @@ class Todo:
     def stats(self) -> Dict[_typedefs.I32, _typedefs.Double]: ...
     def types(self) -> Set[_typedefs.I16]: ...
     def groupby(self) -> Dict[TodoType, List[TodoItem]]: ...
+    def set_label(
+        self, todo_id: _typedefs.I32, label: labels.Label, color: labels.LabelColor
+    ) -> TodoLabel: ...
     def ping(self) -> _typedefs.String: ...
