@@ -63,9 +63,13 @@ class TModuleProxy:
         module_name_map = self._get_module_name_map()
         patch_value_repr(value, module_name_map)
 
+        const_annotations = getattr(self.tmodule, "__thrift_const_annotations__", {})
+        pytype = const_annotations.get(name, {}).get("thriftpyi.type")
+
         return Field(
             name=name,
-            type=guess_type(
+            type=pytype
+            or guess_type(
                 value,
                 module_name_map=module_name_map,
                 known_structs=self.tmodule.__thrift_meta__["structs"],
