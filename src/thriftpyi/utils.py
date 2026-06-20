@@ -6,6 +6,8 @@ from typing import Any
 
 from thriftpy2.thrift import TType
 
+_NO_TYPE = object()
+
 
 def guess_type(  # pylint: disable=too-many-branches
     value,
@@ -19,12 +21,12 @@ def guess_type(  # pylint: disable=too-many-branches
     if isinstance(value, Mapping):
         type_ = type(value).__name__.capitalize()
         key_type = guess_type(
-            next(iter(value.keys())),
+            next(iter(value.keys()), _NO_TYPE),
             module_name_map=module_name_map,
             known_structs=known_structs,
         )
         value_type = guess_type(
-            next(iter(value.values())),
+            next(iter(value.values()), _NO_TYPE),
             module_name_map=module_name_map,
             known_structs=known_structs,
         )
@@ -33,7 +35,7 @@ def guess_type(  # pylint: disable=too-many-branches
     if isinstance(value, Collection):
         type_ = type(value).__name__.capitalize()
         item_type = guess_type(
-            next(iter(value)),
+            next(iter(value), None),
             module_name_map=module_name_map,
             known_structs=known_structs,
         )
